@@ -1,6 +1,6 @@
 <div class="" style="margin-bottom: 20px; margin-top: 6%;">
   <p-panel header="Ações">
-    <div class="flex">
+    <div class="flex" *ngIf="pregaoBool">
       <p class="ntv">
         <p-button class="mr-3" label="Vender Ação"></p-button>
       </p>
@@ -13,6 +13,10 @@
         </p-dropdown>
       </p>
 
+    </div>
+
+    <div *ngIf="!pregaoBool">
+      <p>O Pregão funciona dás 9h ate as 17h. Aguarde para iniciar suas operações.</p>
     </div>
   </p-panel>
 </div>

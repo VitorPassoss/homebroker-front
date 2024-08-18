@@ -176,7 +176,7 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
     const baseTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 14, 0, 0, 0).getTime(); // Define o horário base como 17:00:00
     const step = 10 * 60 * 1000; // Intervalo de 10 minutos
     const valueStep = this.valorFinal * 0.01; // Pequena variação de 1% do valor final
-  
+
     // Adiciona valores com horários antes das 17h
     for (let i = 0; i < 9; i++) {
       const timestamp = baseTime - (10 - i) * step; // Horários antes das 17h
