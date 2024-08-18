@@ -54,7 +54,20 @@ export class StaffService {
 
   }
   
-  
+  getWalletByID(id:any){
+    return this.http.get<any>(`${environment.urlApi}/staff/wallet/${id}`)
+
+  }
+
+  createPerson(body:any){
+    return this.http.post<any>(`${environment.urlApi}/staff/person`, body)
+
+  }
+
+  getPerson(id:any){
+    return this.http.get<any>(`${environment.urlApi}/staff/person/${id}`)
+
+  }
 
 
 }

@@ -1,0 +1,48 @@
+<div class="" style="margin-bottom: 20px; margin-top: 6%;">
+  <p-panel header="Ações">
+    <div class="flex">
+      <p class="ntv">
+        <p-button class="mr-3" label="Vender Ação"></p-button>
+      </p>
+      <p class="ntv">
+        <p-button (onClick)="buyAct()" class="mr-3" label="Comprar Ação"></p-button>
+      </p>
+      <p>
+        <p-dropdown (onChange)="setEmpresa($event)" [(ngModel)]="empresa" [options]="empresas" optionValue="id"
+          optionLabel="nome">
+        </p-dropdown>
+      </p>
+
+    </div>
+  </p-panel>
+</div>
+
+<apx-chart [series]="series" [chart]="chart" [dataLabels]="dataLabels" [markers]="markers" [title]="title" [fill]="fill"
+  [yaxis]="yaxis" [xaxis]="xaxis" [tooltip]="tooltip"></apx-chart>
+
+
+
+
+<p-dialog header="Comprar Ação {{ empresaObj[0].nome}}" [(visible)]="visible" [modal]="true" [style]="{ width: '20vw' }"
+  [draggable]="true" [resizable]="true">
+  <form [formGroup]="buyForm">
+    <div class="grid">
+      <div class="col-12">
+        <div class="flex flex-column gap-2 card-info">
+          <p>Valor da Ação: <strong> R$ {{currentValue.toFixed(2)}}</strong> </p>
+          <p>Valor da Compra: <strong>R$ {{buyValue.toFixed(2)}}</strong> </p>
+          <label htmlFor="quantidade">Quantidade</label>
+          <p-inputNumber  [min]="0" [showButtons]="true" incrementButtonIcon="pi pi-plus"
+            decrementButtonIcon="pi pi-minus" decrementButtonClass="p-button-danger"
+            incrementButtonClass="p-button-success" formControlName="quantidade" id="nome" (onInput)="verifyBuyValue()" />
+        </div>
+      </div>
+
+
+      <p class="ntv3 ">
+        <p-button (onClick)="processBuy()" class="mr-3" label="Salvar"></p-button>
+      </p>
+
+    </div>
+  </form>
+</p-dialog>

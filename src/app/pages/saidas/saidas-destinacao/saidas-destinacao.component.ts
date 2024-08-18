@@ -30,7 +30,6 @@ export class SaidasDestinacaoComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.getDestinos()
   }
 
 

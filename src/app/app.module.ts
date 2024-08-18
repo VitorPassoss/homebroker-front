@@ -21,6 +21,9 @@ import { StaffComponent } from './pages/staff/staff.component';
 import { StaffDetailComponent } from './pages/staff/staff-detail/staff-detail.component';
 import { SplitButtonModule } from 'primeng/splitbutton';
 import { SpeedDialModule } from 'primeng/speeddial';
+import { HomebrokerComponent } from './pages/homebroker/homebroker.component';
+import { NgApexchartsModule } from "ng-apexcharts";
+import { RegisterComponent } from './pages/register/register.component';
 
 @NgModule({
   declarations: [
@@ -28,6 +31,8 @@ import { SpeedDialModule } from 'primeng/speeddial';
     LoginComponent,
     StaffComponent,
     StaffDetailComponent,
+    HomebrokerComponent,
+    RegisterComponent,
   ],
   imports: [
     BrowserModule,
@@ -44,7 +49,8 @@ import { SpeedDialModule } from 'primeng/speeddial';
     BlockLoadingComponent,
     ToastModule,
     SplitButtonModule,
-    SpeedDialModule
+    SpeedDialModule,
+    NgApexchartsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

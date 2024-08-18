@@ -30,6 +30,7 @@ import { ChipModule } from 'primeng/chip';
 import { CalendarModule } from 'primeng/calendar';
 import { DatePipe } from '@angular/common';
 
+import { NgApexchartsModule } from "ng-apexcharts";
 
 @NgModule({
   declarations: [],
@@ -55,7 +56,7 @@ import { DatePipe } from '@angular/common';
     CardModule,
     ChipModule,
     CalendarModule,
-    
+    NgApexchartsModule
   ],
   exports:[
     TabViewModule,
@@ -78,7 +79,7 @@ import { DatePipe } from '@angular/common';
     CardModule,
     ChipModule,
     CalendarModule,
-    
+    NgApexchartsModule
   ],
   providers: [MessageService, DatePipe]
 

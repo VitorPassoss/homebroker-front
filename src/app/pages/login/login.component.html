@@ -1,22 +1,32 @@
-<div class="container">
-    <form (ngSubmit)="submitForm()" [formGroup]="loginForm">
-        <div class="grid col-12 text-center">
-        <div id="cardLogin" class="col-10 col-offset-1 md:col-offset-4 md:col-4">
-            <div class="grid text-center">
-                <label id="lbLogin">Login</label>
-    
-                <input name="email" formControlName="email" id="inputEmail" type="email" autocomplete="off" pInputText placeholder="E-mail" />
-                <p-password name="senha" formControlName="password" [feedback]="false"  #psw  id="inputPassword" placeholder="Senha" 
-                    
-                     >
-                </p-password>
-                <p-button  type="submit" id="btnSubmit" label="Entrar" ></p-button>
-            </div>
-        </div>
+<div class="caixa">
+  <div class="caixa-login caixa-login-two">
+    <div class="area-de-login area-de-login-two">
+      <h2 class="primeiro-titulo">Olá, amigo!</h2>
+      <p class="p-titulo1">cadastre os seus dados e comece a navegar conosco</p>
+      <button class="botao-entrar" (click)="btnInscrever()" >Inscrever</button>
     </div>
-    </form>
-    
+    <div class="criar-login criar-login-two">
+      <h2 class="segundo-titulo">Florida Asset Market</h2>
+     
+      <form [formGroup]="formLogar" class="form" (ngSubmit)="logar()" >
+        <label  class="form-login" for="email">
+          <i class="far fa-user icon-modify"></i>
+          <input type="text" id="email" placeholder="E-mail" formControlName="email">
+        </label>
+        <span *ngIf="formLogar.get('email')?.errors?.['required'] && submetido">
+          Campo obrigatório
+        </span>
+        <label class="form-login" for="senha">
+          <i class="fas fa-lock icon-modify"></i>
+          <input type="password" id="senha" placeholder="Senha" formControlName="password">
+        </label>
+        <span *ngIf="formLogar.get('senha')?.errors?.['required'] && submetido">
+          Campo obrigatório
+        </span>
+        <span>{{mensagemErro}}</span>
+        <br>
+        <button type="submit" class="botao-form">Entrar</button>
+      </form>
+    </div>
+  </div>
 </div>
-
-<app-block-loading></app-block-loading>
-<p-toast position="top-center" key="tc"></p-toast>

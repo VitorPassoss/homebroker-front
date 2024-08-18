@@ -1,0 +1,94 @@
+
+
+
+::ng-deep .ntv  .p-button {
+    background-color: #FFB267;
+    border: none;
+  }
+  
+  
+  ::ng-deep  .p-panel .p-panel-header {
+    background-color: #18181b;
+    border: none;
+    color: #FFB267;
+  }
+  
+  
+  ::ng-deep .p-panel .p-panel-content {
+    background-color: #29292c;
+    border: 2px solid #18181b;
+    color: #FFB267;
+  }
+  
+  .flex {
+    display: flex;
+    flex-direction: row;
+    gap: 25px;
+  }
+  /* From Uiverse.io by alexruix */ 
+/*Neo Brutalism pricing card*/
+.card2 {
+    width: 140px;
+    background: #FFB267;
+    padding: 0.1em;
+    padding-left: 20px;
+    border-radius: 1rem;
+    border: 0.5vmin solid #05060f;
+    box-shadow: 0.4rem 0.4rem #05060f;
+    overflow: hidden;
+    color: #00ffa0;
+
+    .pricing-block-content {
+        display: flex;
+        height: 100%;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      
+      .pricing-plan {
+        color: #05060f;
+        font-size: 1.3rem;
+        line-height: 1.25;
+        font-weight: 700;
+      }
+      
+      .price-value {
+        display: flex;
+        color: #fff;
+        font-size: 1.8rem;
+        line-height: 1.25;
+        font-weight: 700;
+      }
+      
+      .pricing-note {
+        opacity: 0.8;
+      }
+      
+      /*Checklist*/
+      .check-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+      }
+      
+      .check-list-item {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      
+  }
+  
+
+
+  .card2:hover {
+    transform: translate(0px, -6px);
+    background-color: #00ffa0;
+}
+  /*Card content*/
+ 
+
+  a {
+    text-decoration: none;
+  }

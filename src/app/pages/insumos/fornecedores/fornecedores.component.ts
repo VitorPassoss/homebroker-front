@@ -36,6 +36,9 @@ export class FornecedoresComponent implements OnInit {
   }
 
 
+
+
+
   showEditFornecedor(fornecedor: any) {
     this.editingFornecedor = fornecedor;
     this.fornecedorForm.patchValue(fornecedor); // popula o formulário

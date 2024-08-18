@@ -12,9 +12,10 @@ import { SharedService } from 'src/app/shared/shared.service';
 })
 export class LoginComponent implements OnInit {
 
-  loginForm: FormGroup; // Define um FormGroup para o formulário
 
-
+  formLogar! : FormGroup;
+  mensagemErro = "";
+  submetido = false;
 
   ngOnInit(): void {}
 
@@ -25,27 +26,31 @@ export class LoginComponent implements OnInit {
     private sharedService: SharedService
 
   ){
-    this.loginForm = this.formBuilder.group({
+    this.formLogar = this.formBuilder.group({
       email: ['', Validators.required],
       password: ['', Validators.required]
     });
   }
 
+  btnInscrever(){
+    this.router.navigate(["/cadastro"])
+  }
 
-  submitForm() {
-    if (this.loginForm.valid) {
-      const formData = this.loginForm.value;
+  logar() {
+    this.submetido = true
+
+      const formData = this.formLogar.value;
       this.httpClient.post<any>(environment.urlApi + '/auth/login/', formData)
         .toPromise()
         .then(response => {
           localStorage.setItem('access_token', response.access_token);
-          this.router.navigate(['/staff'])
+          this.router.navigate(['/homebroker'])
                   
         })
         .catch(async (error) => {
           this.sharedService.showToastError("Falha ao fazer login, verifique suas credenciais!.")
         });
-    }
+    
   }
 
 

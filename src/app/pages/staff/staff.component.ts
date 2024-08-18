@@ -4,6 +4,7 @@ import { LoadingService } from 'src/app/shared/services/loading.service';
 import { SharedService } from 'src/app/shared/shared.service';
 import { StaffService } from './staff.service';
 import { Router } from '@angular/router';
+import { HomebrokerService } from '../homebroker/homebroker.service';
 
 @Component({
   selector: 'app-staff',
@@ -26,7 +27,7 @@ export class StaffComponent {
   selected:any = null
   idStaffSelected = null;
     searchString: string = '';
-
+  wallets:any = []
   items = [
     {
         label: 'Alterar Situção',
@@ -57,7 +58,8 @@ export class StaffComponent {
     public sharedService: SharedService,
     public loadingService: LoadingService,
     public staffService: StaffService,
-    public routerService: Router
+    public routerService: Router,
+    public homeBrokerS: HomebrokerService
   ){
     this.staffForm = this.formBuilder.group({
       nome: [null, Validators.required],
@@ -80,14 +82,54 @@ export class StaffComponent {
   }
 
   ngOnInit() {
-    this.getStaffs()
-    this.getEmpresas()
-    this.getCargos()
-    this.getStatus()
-    this.getTurnos()
+    this.getWallet();
   }
 
 
+  async getWallet() {
+    // Recupera dados da pessoa do localStorage
+    const personData = JSON.parse(localStorage.getItem('person') || '{}');
+  
+    try {
+      // Obtém as carteiras usando o ID da pessoa
+      const wallets = await this.staffService.getWalletByID(personData.id).toPromise();
+      this.wallets = wallets;
+  
+      // Para cada carteira, obtém o fluxo correspondente e adiciona ao objeto wallet
+      for (let wallet of this.wallets) {
+        // Obtém o último item do fluxo
+        wallet.lastFlowItem = await this.getFlow(wallet.empresa.id);
+      
+        // Calcula o valor atual da cotação
+        const valorAtualCotacao = wallet.lastFlowItem * wallet['quantidade'];
+      
+        const valorCompra = Number(wallet['valor_compra']);
+      
+        const diferenca = valorAtualCotacao - valorCompra;
+      
+        const porcentagem = valorCompra !== 0 ? (diferenca / valorCompra) * 100 : 0;
+      
+        wallet.porcentagem = Number(porcentagem);
+      }
+      
+    } catch (error) {
+      console.error('Erro ao obter as carteiras ou fluxos:', error);
+    }
+  }
+  
+  // Retorna uma Promise que resolve com o último item do array do fluxo
+  getFlow(id: any): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.homeBrokerS.getFlow(id).subscribe({
+        next: (res: any) => {
+          // Assume-se que 'res' é um array; modifica conforme necessário
+          resolve(res[res.length - 1]);
+        },
+        error: (err: any) => reject(err)
+      });
+    });
+  }
+  
   async getStaffs(){
 
     this.staffService.getStaffs().subscribe(
@@ -176,79 +218,9 @@ export class StaffComponent {
 
   }
 
-  getEmpresas(){
-    this.staffService.getEmpresas().subscribe(
-      {
-        next: async(res) => {
-          this.empresas = res
-        }
-      }
-    )
-  }
+ 
 
-  getCargos(){
-    this.staffService.getCargos().subscribe(
-      {
-        next: async(res) => {
-          this.cargos = res
-        }
-      }
-    )
-  }
 
-  getTurnos(){
-    this.staffService.getTurnos().subscribe(
-      {
-        next: async(res) => {
-          this.turnos = res
-        }
-      }
-    )
-  }
 
-  getStatus(){
-    this.staffService.getStatus().subscribe(
-      {
-        next: async(res) => {
-          this.status = res
-        }
-      }
-    )
-  }
-
-  submitForm() {
-    if (this.staffForm.valid) {
-      const formData = this.staffForm.value;
   
-      if (this.statusVis) { 
-        this.staffService.updtStaffs(this.idStaffSelected,formData).subscribe({
-          next: async () => {
-            this.getStaffs();
-            this.sharedService.showToastSuccess("Processo Seletivo atualizado com sucesso");
-            this.visible = false;
-            this.statusVis = false;
-            this.staffForm.reset();
-          },
-          error: async () => {
-            this.sharedService.showToastError("Ocorreu algum problema no registro");
-          }
-        });
-      
-      } else { 
-        this.staffService.saveStaffs(formData).subscribe({
-          next: async () => {
-            this.getStaffs();
-            this.sharedService.showToastSuccess("Staff criada com sucesso");
-            this.visible = false;
-            this.staffForm.reset();
-          },
-          error: async () => {
-            this.sharedService.showToastError("Ocorreu algum problema no registro");
-          }
-        });
-      }
-    } else {
-      this.sharedService.showToastError("Preencha os campos corretamentes");
-    }
-  }
 }

@@ -1,7 +1,7 @@
 #custom-main {
     transition: margin-left .5s;
     //height: 100%;
-    height: calc(100vh - 64px);
+    height: calc(100vh);
     overflow: overlay;
     background-color: var(--color-background);
 }
@@ -11,4 +11,29 @@
     @media screen and (min-width: 501px) {
         margin-left: var(--sidemenu-width);
       }
+}
+
+.header {
+    position: fixed;
+    top: 0px;
+    width: 100vw;
+    background-color: #FFB267;
+    z-index: 50;
+    .flex {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        align-content: center;
+    }
+}
+
+
+::ng-deep .ntv2  .p-button {
+    background-color: #282424;
+    border: null;
+    margin-right: 10px;
+    padding: 0px;
+    width: 25px;
+    height: 25px;
+    font-size: 10px;
 }
