@@ -10,19 +10,21 @@ import { RegisterComponent } from './pages/register/register.component';
 import { SaidasHomeComponent } from './pages/saidas/saidas-home/saidas-home.component';
 
 const routes: Routes = [
-  { 
-    path: '',  canActivate: [JwtAuthGuard], component: MainComponent, children: [
-      {path: 'staff', component: StaffComponent },
-      {path: 'staff/details/:id', component: StaffDetailComponent },
-      {path: 'homebroker', component: HomebrokerComponent },
-      {path: 'pagamento', component: SaidasHomeComponent },
-
-
-    ] 
+  {
+    path: '',
+    canActivate: [JwtAuthGuard],
+    component: MainComponent,
+    children: [
+      { path: 'staff', component: StaffComponent },
+      { path: 'homebroker', component: HomebrokerComponent },
+      { path: 'homebroker/details/:id', component: StaffDetailComponent },
+      { path: 'pagamento', component: SaidasHomeComponent },
+      { path: '', redirectTo: 'homebroker', pathMatch: 'full' }
+    ]
   },
-  {path: 'login', component: LoginComponent},
-  {path: 'cadastro', component: RegisterComponent}
-
+  { path: 'login', component: LoginComponent },
+  { path: 'cadastro', component: RegisterComponent },
+  { path: '**', redirectTo: 'login' }  // Optional: Catch-all route for unknown paths
 ];
 
 @NgModule({

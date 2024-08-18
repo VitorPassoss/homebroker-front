@@ -17,7 +17,8 @@
     position: fixed;
     top: 0px;
     width: 100vw;
-    background-color: #FFB267;
+    background-color: #29292C;
+    border: 1px solid black;
     z-index: 50;
     .flex {
         display: flex;
@@ -37,3 +38,5 @@
     height: 25px;
     font-size: 10px;
 }
+
+

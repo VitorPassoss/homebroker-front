@@ -51,6 +51,7 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
   buyForm: FormGroup
   buyValue:any = 0
   pregaoBool:boolean = false
+  loading: boolean = true;
 
   constructor(
     public sharedService: SharedService,
@@ -74,6 +75,7 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.loadingService.present()
     this.getEmpresas();
   }
 
@@ -87,6 +89,7 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
   }
 
   getEmpresas() {
+    this.loadingService.present()
     this.staffService.getEmpresas().subscribe({
       next: async (res) => {
         this.empresas = res;
@@ -173,7 +176,7 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
 
   private addEndOfDayValues = () => {
     const now = new Date();
-    const baseTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 14, 0, 0, 0).getTime(); // Define o horário base como 17:00:00
+    const baseTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 13, 0, 0, 0).getTime(); // Define o horário base como 17:00:00
     const step = 10 * 60 * 1000; // Intervalo de 10 minutos
     const valueStep = this.valorFinal * 0.01; // Pequena variação de 1% do valor final
 
@@ -189,7 +192,7 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
     }
   
     // Adiciona o último valor exatamente às 17:00:00
-    const endOfDayTimestamp = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 17, 0, 0, 0).getTime();
+    const endOfDayTimestamp = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 13, 0, 0, 0).getTime();
     this.series[0].data.push({
       x: endOfDayTimestamp, // Timestamp exato para 17:00:00
       y: parseFloat(this.valorFinal.toFixed(2)) // Valor final com duas casas decimais
@@ -230,6 +233,8 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
     if (isBetween9And5PM) {
       this.pregaoBool = true
       this.addInitialData();
+      this.loading = false
+      this.loadingService.dismiss()
 
       interval(15000).pipe(
         takeUntil(this.destroy$)
@@ -241,9 +246,12 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
 
      
         this.addEndOfDayValues();
-      
-      return; // Para a execução do código após adicionar os valores finais
+        this.loading = false
+        this.loadingService.dismiss()
+
+      return; 
     }
+
   }
   
 
@@ -296,7 +304,7 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
 
     this.yaxis = {
       labels: {
-        formatter: (val) => val.toFixed(2)
+        formatter: (val) => `R$ ${val.toFixed(2)}`
       },
       title: {
         text: "Preço"
@@ -305,7 +313,10 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
 
     this.xaxis = {
       type: "datetime",
-      categories: []
+      categories: [],
+      title: {
+        text: "Hora"
+      }
     };
 
     this.tooltip = {

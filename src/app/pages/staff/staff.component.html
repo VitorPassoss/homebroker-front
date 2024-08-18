@@ -1,6 +1,6 @@
 <div class="wallet">
-  <div class="card">
-    <div *ngFor="let wallet of wallets" class="notification">
+  <div class="card" >
+    <div *ngFor="let wallet of wallets" class="notification" (click)="navigateTo(wallet.id)">
       <div class="notiglow"></div>
       <div class="notiborderglow"></div>
       <div class="notititle">{{ wallet['empresa']['nome'] }}</div>

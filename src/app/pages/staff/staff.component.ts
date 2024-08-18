@@ -157,6 +157,11 @@ export class StaffComponent {
     
   }
 
+  navigateTo(id:any){
+    this.routerService.navigate(['/homebroker/details/', id]);
+
+  }
+
 
   searchList(){
     var bodySearch = {

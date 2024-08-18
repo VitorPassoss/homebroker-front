@@ -8,14 +8,58 @@
 
 
 ::ng-deep  .p-panel .p-panel-header {
-  background-color: #18181b;
+  background-color: #29292c;
   border: none;
   color: #FFB267;
 }
 
 
 ::ng-deep .p-panel .p-panel-content {
-  background-color: #29292c;
-  border: 2px solid #18181b;
+  background-color: #18171D;
+  border: 2px solid #29292c;
   color: #FFB267;
+}
+
+.search {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+}
+
+
+::ng-deep .p-dropdown {
+  background-color: #29292c;
+  border: none;
+  color: white;
+  width: 1000px ;
+
+  .p-dropdown-label {
+    color: #FFB267;
+  }
+
+  .p-dropdown-panel .p-dropdown-header {
+    background-color: #29292c;
+  }
+  .p-dropdown-panel .p-dropdown-items {
+    padding: 0.75rem 0;
+    background-color: #29292c;
+    color: white;
+  .p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight {
+    color: white;
+
+  }
+
+ 
+}
+
+.p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight {
+  color: #fff;
+  background: #29292c;
+}
+
+::ng-deep .p-inputtext {
+  background-color: #29292c;
+  color: white;
+
+}
 }

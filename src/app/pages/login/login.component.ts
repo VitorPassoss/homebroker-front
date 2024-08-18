@@ -48,7 +48,7 @@ export class LoginComponent implements OnInit {
                   
         })
         .catch(async (error) => {
-          this.sharedService.showToastError("Falha ao fazer login, verifique suas credenciais!.")
+          this.mensagemErro = 'Senha ou E-mail invalidos.'
         });
     
   }

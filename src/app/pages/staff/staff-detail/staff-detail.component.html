@@ -1,106 +1,55 @@
-<form [formGroup]="staffForm">
-    <div class="grid">
-        <div class="col-12">
-            <div class="flex flex-column gap-2">
-                <label htmlFor="nome">Nome</label>
-                <input formControlName="nome" pInputText id="nome" />
-            </div>
-        </div>
-        <div class="col-6">
-            <div class="flex flex-column gap-2"> 
-                <label htmlFor="cpf">CPF</label>
-                <input formControlName="cpf" pInputText id="cpf" />
-
-            </div>
-        </div>
-
-        <div class="col-6">
-            <div class="flex flex-column gap-2"> 
-                <label htmlFor="PIS">PIS</label>
-                <input formControlName="pis" pInputText id="pis" />
-            </div>
-        </div>
-        
-        <div class="col-6">
-            <div class="flex flex-column gap-2"> 
-                <label htmlFor="contato">Telefone</label>
-                <input formControlName="contato_phone" pInputText id="contato_phone" />
-            </div>
-        </div>
-
-        <div class="col-6">
-            <div class="flex flex-column gap-2"> 
-                <label htmlFor="contato">E-mail</label>
-                <input formControlName="contato_email" pInputText id="contato_phone" />
-            </div>
-        </div>
-
-        <div class="col-6">
-            <div class="flex flex-column gap-2"> 
-                <label htmlFor="contato">Jornada</label>
-                <input formControlName="jornada" pInputText id="contato_phone" />
-            </div>
-        </div>
-
+<div *ngIf="loading" class="loading-overlay">
+    <!-- Your loading spinner or placeholder here -->
+    <p>Loading...</p>
+  </div>
   
-
-
-
-
-        <div class="col-6">
-            <div class="flex flex-column gap-2"> 
-                <label htmlFor="nome">Empresa Origem</label>
-                <p-dropdown formControlName="empresa"  [style]="{width: '100%'}" [options]="empresas" optionValue="id" optionLabel="nome" ></p-dropdown>
-
-            </div>
-        </div>
-
-        <div class="col-6">
-            <div class="flex flex-column gap-2"> 
-                <label htmlFor="nome">Cargo</label>
-                <p-dropdown formControlName="cargo"  [style]="{width: '100%'}" [options]="cargos" optionValue="id" optionLabel="nome" ></p-dropdown>
-
-            </div>
-        </div>
-
-
-        <div class="col-6">
-            <div class="flex flex-column gap-2"> 
-                <label htmlFor="nome">Turnos</label>
-                <p-dropdown formControlName="turnos"  [style]="{width: '100%'}" [options]="turnos" optionValue="id" optionLabel="nome" ></p-dropdown>
-
-            </div>
-        </div>
-
-
-        <div class="col-6">
-            <div class="flex flex-column gap-2"> 
-                <label htmlFor="nome">Situação Atual</label>
-                <p-dropdown formControlName="status"  [style]="{width: '100%'}" [options]="status" optionValue="id" optionLabel="nome" ></p-dropdown>
-
-            </div>
-        </div>
-
-        <div class="col-6">
-            <div class="flex flex-column gap-2"> 
-                <label htmlFor="nome">Data de nascimento</label>
-                <p-calendar 
-                formControlName="dt_nascimento"
-                [showIcon]="true"
-                [showOnFocus]="false"
-                inputId="buttondisplay"
-               ></p-calendar>
+  <div *ngIf="!loading">
+    <div class="" style="margin-bottom: 20px; margin-top: 6%;">
+      <p-panel header="Ações da empresa {{empresaObj[0].nome}}">
+        <div class="flex" >
         
+          
+        </div>
+  
+            <div class="search">
+              <h1>Operações</h1>
+                <div class="flex"> <p *ngIf="pregaoBool" class="ntv">
+                  <p-button class="mr-3" label="Vender Ação"></p-button>
+                </p>
+                <p *ngIf="pregaoBool" class="ntv">
+                  <p-button (onClick)="buyAct()" class="mr-3" label="Comprar Ação"></p-button>
+                </p></div>
             </div>
+  
+        <div *ngIf="!pregaoBool">
+          <p style="color: #fff;">O Pregão funciona dás 9h ate as 17h. Aguarde para iniciar suas operações.</p>
         </div>
-
-     
-      
-        <div class="col-12">
-            <p>
-                <p-button  (onClick)="submitForm()" class="mr-3 " label="Salvar Alterações"></p-button>
-            </p>
-        </div>
-
+      </p-panel>
     </div>
-</form>
+  
+    <apx-chart [series]="series" [chart]="chart" [dataLabels]="dataLabels" [markers]="markers" [title]="title" [fill]="fill"
+      [yaxis]="yaxis" [xaxis]="xaxis" [tooltip]="tooltip"></apx-chart>
+  
+    <p-dialog header="Comprar Ação {{ empresaObj[0].nome}}" [(visible)]="visible" [modal]="true" [style]="{ width: '20vw' }"
+      [draggable]="true" [resizable]="true">
+      <form [formGroup]="buyForm">
+        <div class="grid">
+          <div class="col-12">
+            <div class="flex flex-column gap-2 card-info">
+              <p>Valor da Ação: <strong> R$ {{currentValue.toFixed(2)}}</strong> </p>
+              <p>Valor da Compra: <strong>R$ {{buyValue.toFixed(2)}}</strong> </p>
+              <label htmlFor="quantidade">Quantidade</label>
+              <p-inputNumber  [min]="0" [showButtons]="true" incrementButtonIcon="pi pi-plus"
+                decrementButtonIcon="pi pi-minus" decrementButtonClass="p-button-danger"
+                incrementButtonClass="p-button-success" formControlName="quantidade" id="nome" (onInput)="verifyBuyValue()" />
+            </div>
+          </div>
+  
+          <p class="ntv3 ">
+            <p-button (onClick)="processBuy()" class="mr-3" label="Salvar"></p-button>
+          </p>
+        </div>
+      </form>
+    </p-dialog>
+  </div>
+  
