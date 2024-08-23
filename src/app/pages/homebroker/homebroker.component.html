@@ -33,11 +33,11 @@
       </div>
     </p-panel>
   </div>
+  
+  <apx-chart [autoUpdateSeries]="true" [series]="series" [chart]="chart" [dataLabels]="dataLabels" [markers]="markers" [title]="title" [fill]="fill"
+  [yaxis]="yaxis" [xaxis]="xaxis" [tooltip]="tooltip"></apx-chart>
 
-  <apx-chart [series]="series" [chart]="chart" [dataLabels]="dataLabels" [markers]="markers" [title]="title" [fill]="fill"
-    [yaxis]="yaxis" [xaxis]="xaxis" [tooltip]="tooltip"></apx-chart>
-
-  <p-dialog header="Comprar Ação {{ empresaObj[0].nome}}" [(visible)]="visible" [modal]="true" [style]="{ width: '20vw' }"
+  <p-dialog header="Comprar Ação {{ empresaObj[0]?.nome}}" [(visible)]="visible" [modal]="true" [style]="{ width: '20vw' }"
     [draggable]="true" [resizable]="true">
     <form [formGroup]="buyForm">
       <div class="grid">

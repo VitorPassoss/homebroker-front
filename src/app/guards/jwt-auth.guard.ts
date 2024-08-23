@@ -12,25 +12,25 @@ export class JwtAuthGuard implements CanActivate {
 
   canActivate(): boolean {
     const token = localStorage.getItem('access_token');
-    
-
-    var jwtDecoded:any = jwtDecode(token!);
-
-
-    var userId = jwtDecoded?.user_id
-
-    console.log(jwtDecoded)
-
-    this.svc.getPerson(userId).subscribe({
-      next:(res)=>{
-          localStorage.setItem('person', JSON.stringify(res[0]))
-      }
-    })
-    
-
-
+  
 
     if (token) {
+      var jwtDecoded:any = jwtDecode(token!);
+
+
+      var userId = jwtDecoded?.user_id
+  
+      console.log(jwtDecoded)
+  
+      this.svc.getPerson(userId).subscribe({
+        next:(res)=>{
+            if(res.length){
+              localStorage.setItem('person', JSON.stringify(res[0]))
+            }
+        }
+      })
+      
+  
       return true;
     }
 

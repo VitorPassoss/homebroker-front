@@ -134,6 +134,7 @@ export class StaffDetailComponent {
       }
     });
   }
+  
   setupParams(): void {
     if (this.currentClosed) {
       this.initialValue = this.lastDay ? parseFloat(this.lastDay.valor_final) : 0;
