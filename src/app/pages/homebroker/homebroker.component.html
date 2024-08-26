@@ -20,21 +20,28 @@
 
           <div class="search">
             <h1>Operações</h1>
-              <div class="flex"> <p *ngIf="pregaoBool" class="ntv">
+              <div class="flex"> <p  class="ntv">
                 <p-button  (onClick)="sellAct()" class="mr-3" label="Vender Ação"></p-button>
               </p>
-              <p *ngIf="pregaoBool" class="ntv">
+              <p  class="ntv">
                 <p-button (onClick)="buyAct()" class="mr-3" label="Comprar Ação"></p-button>
               </p></div>
           </div>
 
       <div *ngIf="!pregaoBool">
-        <p style="color: #fff;">O Pregão funciona dás 10h ate as 18h. Aguarde para iniciar suas operações.</p>
+        <p >
+          <span style="color: #FFB267; font-weight: 700; font-size: 1.2rem;">O Pregão funciona das 10h ate as 18h</span>.
+          <br>
+          <span style="color: #fff; font-size: 12px;">
+            Pode haver situações que o valor de compra/venda não atinja o valor negociado fora do pregão no próximo dia útil de operações, logo assim, o saldo retido para a operação será devolvido para a carteira no final do  pregão e a operação cancelada.
+          </span> <br>
+          <span style="color: #fff;">Valor de fechamento do dia:</span> R$ {{ this.valorFinal.toFixed(2) }}</p>
+      </div>
+      <div id="chart">
+        <div id="chart-timeline"></div>
       </div>
     </p-panel>
-    <div id="chart">
-      <div id="chart-timeline"></div>
-    </div>
+   
   </div>
 
  

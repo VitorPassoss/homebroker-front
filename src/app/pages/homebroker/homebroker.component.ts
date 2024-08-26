@@ -92,6 +92,7 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
         this.closeds = res;
         this.lastDay = await this.getLastDay(res);
         this.currentClosed = await this.getClosedDay(res);
+
         this.setupParams();
         this.addInitialData();
         this.initChartData();
@@ -110,39 +111,37 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
       this.loading = false;
       this.realtime(); 
     } else {
-      this.chart.destroy()
-
-      this.data = []
-
+      this.chart.destroy();
+      this.data = [];
       this.pregaoBool = false;
       this.loading = false;
-      const now = this.getCurrentTimeInBrasilia();
-      this.currentValue = this.initialValue;
-  
-      const steps = 10; // Quantidade de passos para chegar ao valor final
-      let stepValue = this.currentValue;
-  
-      for (let i = 0; i < steps; i++) {
-        const timestamp = new Date(now.getTime() - (steps - i) * 1000).getTime();
-        const increment = (this.valorFinal - stepValue) / (steps - i);
-        stepValue += increment + (Math.random() - 0.5) * 0.3; // Pequena variação para simular movimentos orgânicos
-  
+      
+      const currentYear = now.getFullYear(); // Obtém o ano atual
+      const august = 7; // Mês de agosto é 7 (base 0, onde janeiro é 0)
+      
+      // Ordenar os fechamentos por dia antes de adicionar no gráfico
+      this.closeds.sort((a: any, b: any) => parseInt(a.dia) - parseInt(b.dia));
+
+      // Itera sobre cada fechamento e adiciona no gráfico
+      this.closeds.forEach((closed: any) => {
+        const day = parseInt(closed.dia); // Extrai o dia do fechamento
+        const timestamp = new Date(currentYear, august, day, 14).getTime(); // Define a data com hora 17:00
+
+        // Adiciona o ponto de dados ao gráfico
         this.data.push({
           x: timestamp,
-          y: parseFloat(stepValue.toFixed(2))
+          y: parseFloat(closed.valor_final)
         });
-      }
-  
-      // Adiciona o valor final exatamente
-      this.data.push({
-        x: new Date(now.getTime()).getTime(),
-        y: this.valorFinal
       });
-  
-      this.initChartData(); 
+
+      this.initChartData2(); // Inicializa o gráfico com os novos dados
+
+      console.log(this.data)
+      console.log(this.closeds)
+      this.currentValue = this.valorFinal;
     }
-  }
-  
+}
+
 
   private getCurrentTimeInBrasilia(): Date {
     const offset = -3; // GMT-3
@@ -183,6 +182,54 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
         labels: {
           format: 'HH:mm:ss'
         }
+      },
+      yaxis: {
+        labels: {
+          formatter: (value: number) => {
+            // Formata o valor como BRL
+            return `R$ ${value.toFixed(2).replace('.', ',')}`;
+          }
+        }
+      },
+      legend: {
+        show: true
+      },
+    };
+  
+    this.chart = new ApexCharts(document.querySelector("#chart"), options);
+    this.chart.render();
+  }
+  private initChartData2(): void {
+    const options = {
+      series: [{
+        name: this.empresaObj.nome,
+        data: this.data.slice()
+      }],
+      chart: {
+        name: this.empresaObj.nome,
+        id: 'realtime',
+        height: 350,
+        type: 'area',
+        toolbar: {
+          show: true
+        },
+        zoom: {
+          enabled: true
+        }
+      },
+      dataLabels: {
+        enabled: false
+      },
+      stroke: {
+        curve: 'smooth'
+      },
+      title: {
+        text: this.empresaObj.nome,
+        align: 'left'
+      },
+      xaxis: {
+        type: 'datetime',
+      
       },
       yaxis: {
         labels: {
