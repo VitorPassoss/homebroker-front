@@ -106,11 +106,9 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
     const isBetween9And5PM = currentHour >= 10 && currentHour < 18;
     
     if (isBetween9And5PM) {
-      // Se o pregão estiver aberto
       this.pregaoBool = true;
       this.loading = false;
-      this.addInitialData(); // Adiciona os dados iniciais normalmente
-      this.realtime(); // Inicia a atualização em tempo real
+      this.realtime(); 
     } else {
       this.chart.destroy()
 
