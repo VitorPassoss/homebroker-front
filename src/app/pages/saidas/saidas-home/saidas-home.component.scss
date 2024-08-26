@@ -24,6 +24,8 @@
     display: flex;
     flex-direction: row;
     gap: 25px;
+    flex-wrap: wrap; /* Permite que os itens quebrem a linha */
+
   }
   /* From Uiverse.io by alexruix */ 
 /*Neo Brutalism pricing card*/
@@ -91,4 +93,9 @@
 
   a {
     text-decoration: none;
+  }
+
+  @media screen and (max-width: 501px) {
+    
+    
   }

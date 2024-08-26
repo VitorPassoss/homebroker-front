@@ -13,10 +13,14 @@
       }
 }
 
+.flex .icon {
+    display: none;
+}
+
 .header {
     position: fixed;
     top: 0px;
-    width: 100vw;
+    width: 100%;
     background-color: #29292C;
     border: 1px solid black;
     z-index: 50;
@@ -27,6 +31,22 @@
         align-content: center;
     }
 }
+
+@media screen and (max-width: 501px) {
+    .flex h1 {
+        font-size: 10px;
+        display: none;
+    }
+
+    .flex p {
+        font-size: 12px;
+    }
+
+    .flex .icon {
+        display: block;
+    }
+    
+  }
 
 
 ::ng-deep .ntv2  .p-button {

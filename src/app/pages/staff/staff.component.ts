@@ -26,7 +26,7 @@ export class StaffComponent {
   turnos:any = []
   selected:any = null
   idStaffSelected = null;
-    searchString: string = '';
+  searchString: string = '';
   wallets:any = []
   items = [
     {
@@ -94,6 +94,7 @@ export class StaffComponent {
       // Obtém as carteiras usando o ID da pessoa
       const wallets = await this.staffService.getWalletByID(personData.id).toPromise();
       this.wallets = wallets;
+
   
       // Para cada carteira, obtém o fluxo correspondente e adiciona ao objeto wallet
       for (let wallet of this.wallets) {

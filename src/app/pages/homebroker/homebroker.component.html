@@ -11,7 +11,7 @@
         <div class="search">
           <h1>Selecione uma empresa</h1>          
             <p-dropdown  [filter]="true"
-            filterBy="name"  (onChange)="setEmpresa($event)" [(ngModel)]="empresa" [options]="empresas" optionValue="id"
+            filterBy="nome"  (onChange)="setEmpresa($event)" [(ngModel)]="empresa" [options]="empresas" optionValue="id"
               optionLabel="nome">
             </p-dropdown>
       
@@ -21,7 +21,7 @@
           <div class="search">
             <h1>Operações</h1>
               <div class="flex"> <p *ngIf="pregaoBool" class="ntv">
-                <p-button class="mr-3" label="Vender Ação"></p-button>
+                <p-button  (onClick)="sellAct()" class="mr-3" label="Vender Ação"></p-button>
               </p>
               <p *ngIf="pregaoBool" class="ntv">
                 <p-button (onClick)="buyAct()" class="mr-3" label="Comprar Ação"></p-button>
@@ -29,15 +29,17 @@
           </div>
 
       <div *ngIf="!pregaoBool">
-        <p style="color: #fff;">O Pregão funciona dás 9h ate as 17h. Aguarde para iniciar suas operações.</p>
+        <p style="color: #fff;">O Pregão funciona dás 10h ate as 18h. Aguarde para iniciar suas operações.</p>
       </div>
     </p-panel>
+    <div id="chart">
+      <div id="chart-timeline"></div>
+    </div>
   </div>
-  
-  <apx-chart [autoUpdateSeries]="true" [series]="series" [chart]="chart" [dataLabels]="dataLabels" [markers]="markers" [title]="title" [fill]="fill"
-  [yaxis]="yaxis" [xaxis]="xaxis" [tooltip]="tooltip"></apx-chart>
 
-  <p-dialog header="Comprar Ação {{ empresaObj[0]?.nome}}" [(visible)]="visible" [modal]="true" [style]="{ width: '20vw' }"
+ 
+
+  <p-dialog header="Comprar Ação {{ empresaObj[0]?.nome}}" [(visible)]="visible" [modal]="true" width="300"
     [draggable]="true" [resizable]="true">
     <form [formGroup]="buyForm">
       <div class="grid">
@@ -58,4 +60,36 @@
       </div>
     </form>
   </p-dialog>
+
+  <p-dialog header="Vender Ação {{ empresaObj[0]?.nome}}" [(visible)]="visibleSell" [modal]="true" width="300"
+  [draggable]="true" [resizable]="true">
+  <form [formGroup]="buyForm" *ngIf="this.flowCurrent">
+    <div class="grid">
+      <div class="col-12">
+        <div class="flex flex-column gap-2 card-info">
+          <p style="margin: 0px !important;">Valor da Ação: <strong> R$ {{currentValue.toFixed(2)}}</strong> </p>
+          <p style="margin: 0px !important;">Valor da Compra: <strong>R$ {{this.flowCurrent.valor_compra}}</strong> </p>
+          <p style="margin: 0px !important;">Ações compradas: <strong>{{ this.flowCurrent.quantidade }}</strong></p>
+          <label htmlFor="quantidade">Quantidade á ser vendida</label>
+          <!-- <input type="number" name="" value={{this.flowCurrent}} formControlName="quantidade" [disabled]="true"  id=""> -->
+          <p-inputNumber [min]="1"  [max]="this.flowCurrent.quantidade" [showButtons]="true" incrementButtonIcon="pi pi-plus"
+            decrementButtonIcon="pi pi-minus" decrementButtonClass="p-button-danger"
+            incrementButtonClass="p-button-success" formControlName="quantidade"   id="nome" (onInput)="verifyBuyValue()"  />
+
+          <p>Valor da venda:  <strong>R$ {{ this.buyValue.toFixed(2) }}</strong> </p>
+        </div>
+      </div>
+
+      <p class="ntv3 ">
+        <p-button (onClick)="processSell()" class="mr-3" label="Salvar"></p-button>
+      </p>
+    </div>
+  </form>
+
+  <div *ngIf="!this.flowCurrent">
+    <h1>
+      Você não tem ações disponiveis para venda!.
+    </h1>
+  </div>
+</p-dialog>
 </div>

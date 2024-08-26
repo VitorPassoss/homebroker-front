@@ -37,6 +37,9 @@
     align-items: center;
     flex-direction: column;
   }
+
+  
+
   
   .caixa .caixa-login .area-de-login-two {
     border-radius: 0px 15px 15px 0px;
@@ -81,6 +84,7 @@
     align-items: center;
     flex-direction: column;
   }
+  
   
   .caixa .caixa-login .criar-login-two {
     border-radius: 15px 0px 0px 15px;
@@ -183,4 +187,64 @@
     text-decoration: underline;
     font-style: italic;
     margin: 0px;
+  }
+
+
+  .botao-entrar2  {
+    display: none;
+  }
+
+
+  @media screen and (max-width: 501px) {
+    .caixa .caixa-login .area-de-login {
+      display: none;
+      background-color: #211D1D;
+
+    }
+
+    .caixa .caixa-login .criar-login {
+      width: 100%;
+      height: 100vh;
+      background-color: #211D1D;
+
+    }
+    
+    .caixa .caixa-login {
+      width: 100vw;
+      display: flex;
+      height: 100%;
+      background-color: #211D1D;
+    }
+    .caixa {
+      background-color: #211D1D;
+    }
+
+    .caixa .caixa-login-two {
+      display: flex;
+      flex-direction: row-reverse;
+      background-color: #211D1D;
+  
+    }
+
+
+    .botao-entrar2 {
+      font-size: 10px;
+      padding: 10px 50px;
+      cursor: pointer;
+      font-weight: bold;
+      width: 150px;
+      margin-top: 1rem;
+      background-color: #18181b;
+      border: 1px solid #18181b;
+      border-radius: 15px;
+      text-transform: uppercase;
+      color: #fff;
+      display: initial;
+    }
+
+    .caixa .caixa-login .criar-login .form {
+    
+      width: 90%;
+    }
+    
   }

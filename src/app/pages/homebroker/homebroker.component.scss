@@ -63,3 +63,15 @@
 
 }
 }
+
+
+@media screen and (max-width: 501px) {
+  ::ng-deep .p-dropdown {
+    width: 100%;
+  }
+
+  ::ng-deep .p-dialog {
+    width: 350px;
+  }
+ 
+}

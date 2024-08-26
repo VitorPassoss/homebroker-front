@@ -42,10 +42,11 @@ export class LoginComponent implements OnInit {
       const formData = this.formLogar.value;
       this.httpClient.post<any>(environment.urlApi + '/auth/login/', formData)
         .toPromise()
-        .then(response => {
-          localStorage.setItem('access_token', response.access_token);
-          this.router.navigate(['/homebroker'])
-                  
+        .then(async (response) => {
+            this.router.navigate([''])
+
+           localStorage.setItem('access_token', response.access_token);
+    
         })
         .catch(async (error) => {
           this.mensagemErro = 'Senha ou E-mail invalidos.'

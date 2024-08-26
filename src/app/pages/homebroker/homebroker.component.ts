@@ -1,24 +1,13 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import {
-  ApexAxisChartSeries,
-  ApexChart,
-  ApexTitleSubtitle,
-  ApexDataLabels,
-  ApexFill,
-  ApexMarkers,
-  ApexYAxis,
-  ApexXAxis,
-  ApexTooltip
-} from "ng-apexcharts";
-import { Subject, interval } from 'rxjs';
-import { takeUntil, map} from 'rxjs/operators';
+import { Subject } from 'rxjs';
 import { LoadingService } from 'src/app/shared/services/loading.service';
 import { SharedService } from 'src/app/shared/shared.service';
 import { StaffService } from '../staff/staff.service';
-import { ActivatedRoute, Router } from '@angular/router';
 import { HomebrokerService } from './homebroker.service';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ChangeDetectorRef } from '@angular/core';
+import { FormBuilder, FormGroup } from "@angular/forms";
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild } from "@angular/core";
+import { ActivatedRoute, Router } from "@angular/router";
+import * as ApexCharts from 'apexcharts'
+
 
 @Component({
   selector: 'app-homebroker',
@@ -26,21 +15,14 @@ import { ChangeDetectorRef } from '@angular/core';
   styleUrls: ['./homebroker.component.scss']
 })
 export class HomebrokerComponent implements OnInit, OnDestroy {
-  public series!: any;
-  public chart!: ApexChart;
-  public dataLabels!: ApexDataLabels;
-  public markers!: ApexMarkers;
-  public title!: ApexTitleSubtitle;
-  public fill!: ApexFill;
-  public yaxis!: ApexYAxis;
-  public xaxis!: ApexXAxis;
-  public tooltip!: ApexTooltip;
 
   private destroy$ = new Subject<void>();
   public initialValue = 0;
   public currentValue = this.initialValue;
   public variation = 0;
   public valorFinal = 0;
+  
+  wallets:any = []
 
   empresas: any[] = [];
   empresa: any = null;
@@ -51,9 +33,19 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
   visible: boolean = false;
   buyForm: FormGroup;
   buyValue: any = 0;
-  pregaoBool: boolean = true;
+  pregaoBool: boolean = false;
   loading: boolean = false;
   private updateSubscription!: any;
+  chart: any;
+  data: any = [];
+  isSetData:boolean = false
+
+  TICKINTERVAL: any = 60000; // 1 minuto em milissegundos
+  XAXISRANGE: any = 777600000;
+  flowCurrent:any = null
+  lastDate: any = 0;
+
+  visibleSell:any = false;
 
   constructor(
     public sharedService: SharedService,
@@ -71,7 +63,8 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
       quantidade: [null],
       empresa: [null],
       valor_compra: [null],
-      valor_acao: [0]
+      valor_acao: [0],
+      quantidade_vendida: [0]
     });
   }
 
@@ -84,95 +77,240 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
       next: async (res) => {
         this.empresas = await res;
         this.setupInitial();
-      }
+      },
     });
   }
 
-  setupInitial() {
+  async setupInitial() {
     const empresaId = Number(this.empresas[0].id);
     this.empresa = empresaId;
 
-    this.empresaObj = this.empresas.find(empresa => empresa.id === empresaId);
+    this.empresaObj = await this.empresas.find(empresa => empresa.id === empresaId);
 
     this.homeBrokerS.getFlow(empresaId).subscribe({
       next: async (res) => {
         this.closeds = res;
-        this.lastDay = this.getLastDay(res);
-        this.currentClosed = this.getClosedDay(res);
+        this.lastDay = await this.getLastDay(res);
+        this.currentClosed = await this.getClosedDay(res);
         this.setupParams();
+        this.addInitialData();
         this.initChartData();
-        // this.addInitialData();
-        this.startRealTimeUpdates();
+        this.merkatFlow();
       }
     });
   }
 
-  setupParams(): void {
-    if (this.currentClosed && this.lastDay) {
-      this.initialValue = parseFloat(this.lastDay.valor_final);
-      this.valorFinal = parseFloat(this.currentClosed.valor_final);
-      this.variation = parseFloat(this.currentClosed.variação);
-      this.currentValue = this.initialValue;
+  merkatFlow() {
+    const now = new Date();
+    const currentHour = now.getHours() + 1;
+    const isBetween9And5PM = currentHour >= 9 && currentHour <= 23;
+    if (isBetween9And5PM) {
+      this.pregaoBool = true;
+      this.loading = false;
+      this.realtime();
+    } else {
+    
+      this.pregaoBool = false;
+      this.loading = false;
+      return;
     }
+  }
+
+  private getCurrentTimeInBrasilia(): Date {
+    const offset = -3; // GMT-3
+    const now = new Date();
+    return new Date(now.getTime() + offset * 3600 * 1000);
+  }
+
+  private initChartData(): void {
+    const options = {
+      series: [{
+        name: this.empresaObj.nome,
+        data: this.data.slice()
+      }],
+      chart: {
+        name: this.empresaObj.nome,
+        id: 'realtime',
+        height: 350,
+        type: 'area',
+        toolbar: {
+          show: true
+        },
+        zoom: {
+          enabled: true
+        }
+      },
+      dataLabels: {
+        enabled: false
+      },
+      stroke: {
+        curve: 'smooth'
+      },
+      title: {
+        text: this.empresaObj.nome,
+        align: 'left'
+      },
+      xaxis: {
+        type: 'datetime',
+        labels: {
+          format: 'HH:mm:ss'
+        }
+      },
+      legend: {
+        show: true
+      },
+    };
+
+    this.chart = new ApexCharts(document.querySelector("#chart"), options);
+    this.chart.render();
   }
 
   private addInitialData(): void {
-    const now = new Date();
-    const timezoneOffset = -2 ; // Offset de Brasília em minutos (UTC-3)
+    const now = this.getCurrentTimeInBrasilia();
     this.currentValue = this.initialValue;
+    for (let i = 0; i <= 10; i++) {
+      const timestamp = new Date(now.getTime() - (10 - i) * 1000).getTime();
+      const variationFactor = (Math.random() - 0.5) * (2 * this.variation);
+      this.currentValue += this.currentValue * variationFactor;
 
-    
-  
-    for (let i = 0; i < 10; i++) {
-      const localTime = new Date(now.getTime() - (10 - i) * 1000); // Tempo atual menos o intervalo
-      const localTimeWithOffset = new Date(localTime.getTime() - localTime.getTimezoneOffset() * 60000); // Ajusta para UTC
-      const brTime = new Date(localTimeWithOffset.getTime()); // Ajusta para o horário de Brasília
-  
-      this.currentValue += this.currentValue * ((Math.random() - 0.5) * (2 * this.variation));
-      
-      this.series[0].data.push({
-        x: new Date(localTime.getTime()),
-        y: this.currentValue
-      });
-    }
-    
-    this.cdr.detectChanges();
-  }
-  
+      if(i == 10 && this.pregaoBool == false) {
+        this.data.push({
+          x: timestamp,
+          y: this.valorFinal - 5
+        })
+        
+        this.data.push({
+          x: timestamp,
+          y: this.valorFinal - 3
+        })
+        this.data.push({
+          x: timestamp,
+          y: this.valorFinal - 2
+        })
 
-  startRealTimeUpdates(): void {
-    this.updateSubscription = interval(1000).pipe(
-      takeUntil(this.destroy$),
-      map(() => {
-        const now = new Date();
-        const utcTime = new Date(now.getTime());
-        const brTime = new Date(utcTime.getTime() - 3 * 60 * 60000); // UTC-3
-  
-        this.currentValue = parseFloat((this.currentValue + this.variation).toFixed(2));
+        this.data.push({
+          x: timestamp,
+          y: this.valorFinal + 8
+        })
 
-
-        console.log(this.currentValue)
-
-        this.series[0].data.push({
-          x: now.getTime(),
-          y: this.currentValue
+        this.data.push({
+          x: timestamp,
+          y: this.valorFinal + 2
+        })
+        
+        this.data.push({
+          x: timestamp,
+          y: this.valorFinal
+        })
+      } else {
+        this.data.push({
+          x: timestamp,
+          y: this.currentValue.toFixed(2)
         });
-  
-        if (this.series[0].data.length > 10) {
-          this.series[0].data.shift(); 
-        }
-  
+      }
+    }
 
-        console.log(this.series[0].data)
-
-        this.cdr.detectChanges(); // Forçar detecção de mudanças após adicionar novos dados
-      })
-    ).subscribe();
+    
   }
-  
+
+  setupParams(): void {
+    if (this.currentClosed && this.lastDay) {
+      this.currentValue = parseFloat(this.lastDay.valor_final);
+      this.initialValue = parseFloat(this.lastDay.valor_final);
+      this.valorFinal = parseFloat(this.currentClosed.valor_final);
+      this.variation = parseFloat(this.currentClosed.variação);
+    }
+  }
+
+  realtime() {
+    setInterval(() => {
+      const newDate = this.getCurrentTimeInBrasilia().getTime();
+      let variationFactor = (Math.random() - 0.5) * (2 * this.variation);
+
+      this.currentValue += this.currentValue * variationFactor;
+
+      const formattedCurrentValue = parseFloat(this.currentValue.toFixed(2));
+
+      this.data.push({
+        x: newDate,
+        y: formattedCurrentValue
+      });
+
+      // Limite o número de pontos de dados no gráfico
+      if (this.data.length > 10) {
+        this.data.shift();
+      }
+
+      this.chart.updateSeries([{
+        data: this.data
+      }]);
+
+    }, 15000);
+  }
+
   buyAct() {
     this.visible = true;
   }
+
+  sellAct(){
+    this.getWallet();
+    this.visibleSell = true
+  }
+  
+
+  async getWallet() {
+    // Recupera dados da pessoa do localStorage
+    const personData = JSON.parse(localStorage.getItem('person') || '{}');
+  
+    try {
+      // Obtém as carteiras usando o ID da pessoa
+      const wallets = await this.staffService.getWalletByID(personData.id).toPromise();
+      this.wallets = wallets;
+      console.log(this.wallets)
+
+      // Para cada carteira, obtém o fluxo correspondente e adiciona ao objeto wallet
+      for (let wallet of this.wallets) {
+        // Obtém o último item do fluxo
+        wallet.lastFlowItem = await this.getFlow(wallet.empresa.id);
+        
+
+        // Calcula o valor atual da cotação
+        const valorAtualCotacao = wallet.lastFlowItem * wallet['quantidade'];
+      
+        const valorCompra = Number(wallet['valor_compra']);
+      
+        const diferenca = valorAtualCotacao - valorCompra;
+      
+        const porcentagem = valorCompra !== 0 ? (diferenca / valorCompra) * 100 : 0;
+      
+        wallet.porcentagem = Number(porcentagem);
+      }
+
+      this.getFlowByBussines()
+
+      
+    } catch (error) {
+      console.error('Erro ao obter as carteiras ou fluxos:', error);
+    }
+  }
+
+
+ async getFlowByBussines(){
+     this.flowCurrent = await this.wallets.find((wallet:any) => wallet.empresa.id === this.empresaObj.id);
+    console.log(this.flowCurrent)
+  }
+
+  getFlow(id: any): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.homeBrokerS.getFlow(id).subscribe({
+        next: (res: any) => {
+          resolve(res[res.length - 1]);
+        },
+        error: (err: any) => reject(err)
+      });
+    });
+  }
+  
 
   ngOnDestroy(): void {
     this.destroy$.next();
@@ -190,95 +328,28 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
   }
 
   setEmpresa(event: any): void {
+    this.chart.destroy()
+    this.isSetData = true
+    this.data = []
+    
+
     this.empresa = event.value;
     this.empresaObj = this.empresas.find(empresa => empresa.id === this.empresa);
+
+    
 
     this.homeBrokerS.getFlow(event.value).subscribe({
       next: async (res) => {
         this.closeds = res;
-        this.currentClosed = this.getClosedDay(res);
+        this.lastDay = await this.getLastDay(res);
+        this.currentClosed = await this.getClosedDay(res);
         this.setupParams();
+        this.addInitialData();
         this.initChartData();
+        this.merkatFlow();
+        
       }
     });
-  }
-
-  private initChartData(): void {
-    if (!this.empresaObj) {
-      console.error('empresaObj não está definido.');
-      return;
-    }
-
-    this.series = [
-      {
-        name: this.empresaObj.nome, // Assumindo que empresaObj é um objeto
-        type: 'area',
-        data: []
-      },
-
-    ];
-
-    this.chart = {
-      foreColor: '#fff',
-      type: "area",
-      stacked: false,
-      height: 350,
-      zoom: {
-        type: "x",
-        enabled: true,
-        autoScaleYaxis: true
-      },
-      toolbar: {
-        autoSelected: "zoom"
-      },
-      
-      
-    };
-
- 
-
-    this.markers = {
-      size: 0
-    };
-
-    this.title = {
-      text: 'Variação do dia',
-      align: "left"
-    };
-
-    this.fill = {
-      type: 'gradient',
-      gradient: {
-        shadeIntensity: 1,
-        inverseColors: false,
-        opacityFrom: 0.5,
-        opacityTo: 0,
-        stops: [0, 90, 100]
-      }
-    };
-
-    this.yaxis = {
-      labels: {
-        formatter: (val) => val.toFixed(2)
-      },
-      title: {
-        text: "Preço"
-      }
-    };
-
-    this.xaxis = {
-      type: "datetime",
-      title: {
-        text: "Hora"
-      }
-    };
-
-    this.tooltip = {
-      shared: false,
-      y: {
-        formatter: (val) => val.toFixed(2)
-      }
-    };
   }
 
   private getClosedDay(data: any[]): any {
@@ -292,18 +363,54 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
     return data.find(item => parseInt(item.dia, 10) === previousDay);
   }
 
-  processBuy() {
-    this.loadingService.present()
+  processSell(){
+    this.loadingService.present();
     const formattedValue = parseFloat(this.currentValue.toFixed(2));
 
     const quantidade = this.buyForm.value['quantidade'];
     const valor_compra = formattedValue * quantidade;
-    var personData: any = localStorage.getItem('person')
+    var personData: any = localStorage.getItem('person');
     var personData = JSON.parse(personData);
-    console.log(this.empresaObj[0].id);
 
     this.buyForm.patchValue({
-      empresa: this.empresaObj[0].id,
+      empresa: this.empresaObj.id,
+      person: personData.id,
+      quantidade_vendida: quantidade,
+      valor_acao: parseFloat(this.currentValue.toFixed(2))
+    });
+
+    const formData = this.buyForm.value;
+
+    console.log(formData)
+
+    this.homeBrokerS.processSell(formData).subscribe({
+      next: async (res) => {
+        this.loadingService.dismiss();
+        this.sharedService.showToastSuccess('Sua venda foi efetuada com sucesso.');
+        this.visible = false;
+        var valorSaldo = Number(personData.saldo_atual) + valor_compra
+        this.sharedService.updateSaldo(valorSaldo.toFixed(2));
+        this.router.navigate(['/staff']);
+      },
+      error: async (err) => {
+        this.loadingService.dismiss();
+        this.sharedService.showToastError("Saldo insuficiente!");
+      }
+    });
+  
+  }
+
+  processBuy() {
+    this.loadingService.present();
+    const formattedValue = parseFloat(this.currentValue.toFixed(2));
+
+    const quantidade = this.buyForm.value['quantidade'];
+    const valor_compra = formattedValue * quantidade;
+    var personData: any = localStorage.getItem('person');
+    var personData = JSON.parse(personData);
+
+    this.buyForm.patchValue({
+      empresa: this.empresaObj.id,
       person: personData.id,
       valor_compra: valor_compra.toFixed(2),
       valor_acao: formattedValue
@@ -311,24 +418,18 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
 
     const formData = this.buyForm.value;
 
-
-
-    this.homeBrokerS.processBuy(formData).subscribe(
-      {
-        next: async (res) => {
-          this.loadingService.dismiss()
-          this.sharedService.showToastSuccess('Sua compra foi efetuada com sucesso.')
-          this.visible = false;
-          this.sharedService.updateSaldo(Number(personData.saldo_atual) - valor_compra);
-
-          this.router.navigate(['/staff'])
-        },
-        error: async (err) => {
-          this.loadingService.dismiss()
-          this.sharedService.showToastError("Saldo insuficiente!")
-
-        }
+    this.homeBrokerS.processBuy(formData).subscribe({
+      next: async (res) => {
+        this.loadingService.dismiss();
+        this.sharedService.showToastSuccess('Sua compra foi efetuada com sucesso.');
+        this.visible = false;
+        this.sharedService.updateSaldo(Number(personData.saldo_atual) - valor_compra);
+        this.router.navigate(['/staff']);
+      },
+      error: async (err) => {
+        this.loadingService.dismiss();
+        this.sharedService.showToastError("Saldo insuficiente!");
       }
-    )
+    });
   }
 }

@@ -1,6 +1,6 @@
 <div class="wallet">
-  <div class="card" >
-    <div *ngFor="let wallet of wallets" class="notification" (click)="navigateTo(wallet.id)">
+  <div class="card" *ngIf="wallets.length > 0">
+    <div  *ngFor="let wallet of wallets" class="notification" (click)="navigateTo(wallet.id)">
       <div class="notiglow"></div>
       <div class="notiborderglow"></div>
       <div class="notititle">{{ wallet['empresa']['nome'] }}</div>
@@ -16,6 +16,11 @@
 
           </div>
         </div>
+
+      </div>
+
+      <div class="card" *ngIf="wallets.length == 0">
+        <h1 style="color: #FFB267; margin-left: 10px;" >Você não tem nenhuma ação rendendo na sua carteira! <a href="/homebroker">Clique aqui para comprar.</a></h1>
 
       </div>
     </div>

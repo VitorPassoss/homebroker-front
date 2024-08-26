@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { Injectable } from '@angular/core';
 
 
 @Injectable({
@@ -25,6 +25,11 @@ export class HomebrokerService {
 
   processBuy(body:any) {
     return this.http.post<any>(`${environment.urlApi}/staff/wallet`, body )
+
+  }
+
+  processSell(body:any) {
+    return this.http.put<any>(`${environment.urlApi}/staff/wallet`, body )
 
   }
 

@@ -31,6 +31,7 @@ import { CalendarModule } from 'primeng/calendar';
 import { DatePipe } from '@angular/common';
 
 import { NgApexchartsModule } from "ng-apexcharts";
+import { CanvasJSAngularChartsModule } from '@canvasjs/angular-charts';
 
 @NgModule({
   declarations: [],
@@ -56,7 +57,8 @@ import { NgApexchartsModule } from "ng-apexcharts";
     CardModule,
     ChipModule,
     CalendarModule,
-    NgApexchartsModule
+    NgApexchartsModule,
+    CanvasJSAngularChartsModule
   ],
   exports:[
     TabViewModule,
@@ -79,7 +81,8 @@ import { NgApexchartsModule } from "ng-apexcharts";
     CardModule,
     ChipModule,
     CalendarModule,
-    NgApexchartsModule
+    NgApexchartsModule,
+    CanvasJSAngularChartsModule
   ],
   providers: [MessageService, DatePipe]
 
