@@ -102,19 +102,49 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
 
   merkatFlow() {
     const now = new Date();
-    const currentHour = now.getHours() + 1;
+    const currentHour = now.getHours() + 1; // Ajustando fuso horário se necessário
     const isBetween9And5PM = currentHour >= 10 && currentHour < 18;
+    
     if (isBetween9And5PM) {
+      // Se o pregão estiver aberto
       this.pregaoBool = true;
       this.loading = false;
-      this.realtime();
+      this.addInitialData(); // Adiciona os dados iniciais normalmente
+      this.realtime(); // Inicia a atualização em tempo real
     } else {
-    
+      this.chart.destroy()
+
+      this.data = []
+
       this.pregaoBool = false;
       this.loading = false;
-      return;
+      const now = this.getCurrentTimeInBrasilia();
+      this.currentValue = this.initialValue;
+  
+      const steps = 10; // Quantidade de passos para chegar ao valor final
+      let stepValue = this.currentValue;
+  
+      for (let i = 0; i < steps; i++) {
+        const timestamp = new Date(now.getTime() - (steps - i) * 1000).getTime();
+        const increment = (this.valorFinal - stepValue) / (steps - i);
+        stepValue += increment + (Math.random() - 0.5) * 0.3; // Pequena variação para simular movimentos orgânicos
+  
+        this.data.push({
+          x: timestamp,
+          y: parseFloat(stepValue.toFixed(2))
+        });
+      }
+  
+      // Adiciona o valor final exatamente
+      this.data.push({
+        x: new Date(now.getTime()).getTime(),
+        y: this.valorFinal
+      });
+  
+      this.initChartData(); 
     }
   }
+  
 
   private getCurrentTimeInBrasilia(): Date {
     const offset = -3; // GMT-3
@@ -185,34 +215,12 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
       // Atualiza o valor atual com a variação calculada
       this.currentValue += this.currentValue * variationFactor;
   
-      if (i === 10 && this.pregaoBool === false) {
-        // Gerar uma sequência orgânica de aproximação ao valor final
-        const steps = 10; // Quantidade de passos para chegar ao valor final
-        let stepValue = this.currentValue;
-  
-        for (let j = 0; j < steps; j++) {
-          // Calcula um valor intermediário mais próximo do valor final
-          const increment = (this.valorFinal - stepValue) / (steps - j);
-          stepValue += increment + (Math.random() - 0.5) * 0.3; // Pequena variação para simular movimentos orgânicos
-  
-          this.data.push({
-            x: timestamp + j * 1000, // Incrementa o tempo para cada ponto
-            y: parseFloat(stepValue.toFixed(2))
-          });
-        }
-  
-        // Adiciona o valor final exatamente
-        this.data.push({
-          x: timestamp + steps * 1000,
-          y: this.valorFinal
-        });
-  
-      } else {
+     
         this.data.push({
           x: timestamp,
           y: parseFloat(this.currentValue.toFixed(2))
         });
-      }
+      
     }
   }
   
