@@ -156,14 +156,23 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
           format: 'HH:mm:ss'
         }
       },
+      yaxis: {
+        labels: {
+          formatter: (value: number) => {
+            // Formata o valor como BRL
+            return `R$ ${value.toFixed(2).replace('.', ',')}`;
+          }
+        }
+      },
       legend: {
         show: true
       },
     };
-
+  
     this.chart = new ApexCharts(document.querySelector("#chart"), options);
     this.chart.render();
   }
+  
 
   private addInitialData(): void {
     const now = this.getCurrentTimeInBrasilia();
@@ -197,7 +206,7 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
           x: timestamp,
           y: this.valorFinal + 2
         })
-        
+
         this.data.push({
           x: timestamp,
           y: this.valorFinal
