@@ -1,21 +1,21 @@
 <div id="mySidenav" class="sidenav" *ngIf="menuOpen">
 
 
-    <div class="sidenav-item" routerLink="homebroker" routerLinkActive="active">
+    <div (click)="toggleMenu()" class="sidenav-item" routerLink="homebroker" routerLinkActive="active">
         <a>
             <span class="material-icons mr-2 ml-1">grid_view</span>
             Ações Tempo Real
         </a>
     </div>
 
-    <div class="sidenav-item" routerLink="staff" routerLinkActive="active">
+    <div (click)="toggleMenu()" class="sidenav-item" routerLink="staff" routerLinkActive="active">
         <a>
             <span class="material-icons mr-2 ml-1">wallet</span>
             Minha Carteira
         </a>
     </div>
 
-    <div class="sidenav-item" routerLink="pagamento" routerLinkActive="active">
+    <div (click)="toggleMenu()" class="sidenav-item" routerLink="pagamento" routerLinkActive="active">
         <a>
             <span class="material-icons mr-2 ml-1">wallet</span>
             Pagamento

@@ -1,6 +1,6 @@
 <div class="wallet">
   <div class="card" *ngIf="wallets.length > 0">
-    <div  *ngFor="let wallet of wallets" class="notification" (click)="navigateTo(wallet.id)">
+    <div  *ngFor="let wallet of wallets" class="notification" (click)="navigateTo(wallet.empresa.id)">
       <div class="notiglow"></div>
       <div class="notiborderglow"></div>
       <div class="notititle">{{ wallet['empresa']['nome'] }}</div>
