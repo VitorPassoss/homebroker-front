@@ -12,18 +12,18 @@ export class MenuComponent implements OnInit {
   constructor(private router: Router) {}
 
   ngOnInit() {
-    // Inicializa menuOpen com base na largura da janela
     this.menuOpen = window.innerWidth > 550;
   }
 
   @HostListener('window:resize', ['$event'])
   onResize(event: Event) {
-    // Atualiza menuOpen sempre que a janela é redimensionada
     this.menuOpen = window.innerWidth > 550;
   }
 
   toggleMenu() {
-    this.menuOpen = !this.menuOpen;
+    if( window.innerWidth < 550){
+      this.menuOpen = !this.menuOpen;
+    }
   }
 
   logout() {

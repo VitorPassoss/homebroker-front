@@ -24,23 +24,23 @@ export class StaffDetailComponent {
 
   empresas: any[] = [];
   empresa: any = null;
-  empresaObj:any = null;
+  empresaObj: any = null;
   closeds: any = [];
   currentClosed: any = null;
-  lastDay:any = null;
+  lastDay: any = null;
   visible: boolean = false;
   buyForm: FormGroup
-  buyValue:any = 0
-  pregaoBool:boolean = false
+  buyValue: any = 0
+  pregaoBool: boolean = false
   loading: boolean = true;
-  idEmpresa:any = 1;
-  wallets:any = []
+  idEmpresa: any = 1;
+  wallets: any = []
 
   chart: any;
   data: any = [];
-  visibleSell:any = false;
-  flowCurrent:any = null
-  isSetData:boolean = false
+  visibleSell: any = false;
+  flowCurrent: any = null
+  isSetData: boolean = false
   private updateSubscription!: any;
 
   constructor(
@@ -52,8 +52,8 @@ export class StaffDetailComponent {
     private route: ActivatedRoute,
     private formBuilder: FormBuilder,
     private router: Router,
-    
-  ) { 
+
+  ) {
     this.buyForm = this.formBuilder.group({
       person: [null],
       quantidade: [null],
@@ -108,43 +108,32 @@ export class StaffDetailComponent {
 
   merkatFlow() {
     const now = new Date();
-    const currentHour = now.getHours() + 1; // Ajustando fuso horário se necessário
+    const currentHour = now.getHours() + 1;
     const isBetween9And5PM = currentHour >= 10 && currentHour < 18;
-    
+
+
+    if (currentHour >= 0 && currentHour < 10) {
+      this.valorFinal = this.lastDay.valor_final;
+    }
+
+
+    if (currentHour >= 10 && currentHour < 24) {
+      this.currentValue = this.currentClosed.valor_final;
+    }
+
     if (isBetween9And5PM) {
       this.pregaoBool = true;
       this.loading = false;
-      this.realtime(); 
+      this.realtime();
     } else {
       this.chart.destroy();
       this.data = [];
       this.pregaoBool = false;
       this.loading = false;
-      
-      const currentYear = now.getFullYear(); // Obtém o ano atual
-      const august = 7; // Mês de agosto é 7 (base 0, onde janeiro é 0)
-      
-      // Ordenar os fechamentos por dia antes de adicionar no gráfico
-      this.closeds.sort((a: any, b: any) => parseInt(a.dia) - parseInt(b.dia));
-
-      // Itera sobre cada fechamento e adiciona no gráfico
-      this.closeds.forEach((closed: any) => {
-        const day = parseInt(closed.dia); // Extrai o dia do fechamento
-        const timestamp = new Date(currentYear, august, day, 14).getTime(); // Define a data com hora 17:00
-
-        this.data.push({
-          x: timestamp,
-          y: parseFloat(closed.valor_final)
-        });
-      });
-
-      this.initChartData2(); // Inicializa o gráfico com os novos dados
-
-      console.log(this.data)
-      console.log(this.closeds)
-      this.currentValue = this.valorFinal;
+      this.addInitialData();
+      this.initChartData();
     }
-}
+  }
 
 
   private getCurrentTimeInBrasilia(): Date {
@@ -183,9 +172,9 @@ export class StaffDetailComponent {
       },
       xaxis: {
         type: 'datetime',
-        labels: {
-          format: 'HH:mm:ss'
-        }
+        // labels: {
+        //   format: 'HH:mm:ss'
+        // }
       },
       yaxis: {
         labels: {
@@ -199,7 +188,7 @@ export class StaffDetailComponent {
         show: true
       },
     };
-  
+
     this.chart = new ApexCharts(document.querySelector("#chart"), options);
     this.chart.render();
   }
@@ -233,7 +222,7 @@ export class StaffDetailComponent {
       },
       xaxis: {
         type: 'datetime',
-      
+
       },
       yaxis: {
         labels: {
@@ -247,39 +236,78 @@ export class StaffDetailComponent {
         show: true
       },
     };
-  
+
     this.chart = new ApexCharts(document.querySelector("#chart"), options);
     this.chart.render();
   }
-  
+
 
   private addInitialData(): void {
-    const now = this.getCurrentTimeInBrasilia();
-    this.currentValue = this.initialValue;
-    
-    for (let i = 0; i <= 10; i++) {
-      const timestamp = new Date(now.getTime() - (10 - i) * 1000).getTime();
-      const variationFactor = (Math.random() - 0.5) * (2 * this.variation);
-  
-      // Atualiza o valor atual com a variação calculada
-      this.currentValue += this.currentValue * variationFactor;
-  
-     
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const startDate = new Date(currentYear, 7, 1); // Data de início: 01/08/2024
+    const baseMonth = 7; // Mês de agosto (0-indexado, agosto é 7)
+
+    // Calcular quantos dias passaram desde o início de agosto até hoje
+    const daysPassed = Math.floor((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+
+    console.log(daysPassed);
+    console.log(this.closeds.length);
+
+    // Ordenar fechamentos por dia
+    this.closeds.sort((a: any, b: any) => parseInt(a.dia) - parseInt(b.dia));
+
+    // Adicionar fechamentos ao gráfico considerando meses e dias
+    this.closeds.forEach((closed: any, index: number) => {
+      let day = parseInt(closed.dia);
+      let month = baseMonth;
+
+      // Calcular mês e dia considerando dias que excedem 31
+      while (day > 31) {
+        day -= 31;
+        month += 1; // Passa para o próximo mês
+      }
+
+      // Se o mês calculado for maior que 11 (dezembro), reseta para 0 (janeiro do próximo ano)
+      if (month > 11) {
+        month -= 12;
+      }
+
+      const timestamp = new Date(currentYear, month, day, 14).getTime();
+
+      this.data.push({
+        x: timestamp,
+        y: parseFloat(closed.valor_final)
+      });
+    });
+
+    const nowH = new Date();
+    const currentHour = nowH.getHours() + 1;
+
+    // Se o horário estiver entre meia-noite e 10 horas da manhã
+    if (currentHour >= 0 && currentHour < 10) {
+      this.data.pop(); // Remove o último registro
+
+      if (this.data.length > 0) {
+        const previousEntry = this.data[this.data.length - 1];
         this.data.push({
-          x: timestamp,
-          y: parseFloat(this.currentValue.toFixed(2))
+          x: previousEntry.x, // Reutilizar o timestamp do dia anterior
+          y: previousEntry.y  // Reutilizar o valor do dia anterior
         });
-      
+      }
     }
   }
-  
+
 
   setupParams(): void {
     if (this.currentClosed && this.lastDay) {
-      this.currentValue = parseFloat(this.lastDay.valor_final);
       this.initialValue = parseFloat(this.lastDay.valor_final);
-      this.valorFinal = parseFloat(this.currentClosed.valor_final);
+      this.valorFinal = parseFloat(this.lastDay.valor_final);
+      this.currentValue = parseFloat(this.lastDay.valor_final);
       this.variation = parseFloat(this.currentClosed.variação);
+
+
+
     }
   }
 
@@ -313,16 +341,16 @@ export class StaffDetailComponent {
     this.visible = true;
   }
 
-  sellAct(){
+  sellAct() {
     this.getWallet();
     this.visibleSell = true
   }
-  
+
 
   async getWallet() {
     // Recupera dados da pessoa do localStorage
     const personData = JSON.parse(localStorage.getItem('person') || '{}');
-  
+
     try {
       // Obtém as carteiras usando o ID da pessoa
       const wallets = await this.staffService.getWalletByID(personData.id).toPromise();
@@ -333,31 +361,31 @@ export class StaffDetailComponent {
       for (let wallet of this.wallets) {
         // Obtém o último item do fluxo
         wallet.lastFlowItem = await this.getFlow(wallet.empresa.id);
-        
+
 
         // Calcula o valor atual da cotação
         const valorAtualCotacao = wallet.lastFlowItem * wallet['quantidade'];
-      
+
         const valorCompra = Number(wallet['valor_compra']);
-      
+
         const diferenca = valorAtualCotacao - valorCompra;
-      
+
         const porcentagem = valorCompra !== 0 ? (diferenca / valorCompra) * 100 : 0;
-      
+
         wallet.porcentagem = Number(porcentagem);
       }
 
       this.getFlowByBussines()
 
-      
+
     } catch (error) {
       console.error('Erro ao obter as carteiras ou fluxos:', error);
     }
   }
 
 
- async getFlowByBussines(){
-     this.flowCurrent = await this.wallets.find((wallet:any) => wallet.empresa.id === this.empresaObj.id);
+  async getFlowByBussines() {
+    this.flowCurrent = await this.wallets.find((wallet: any) => wallet.empresa.id === this.empresaObj.id);
     console.log(this.flowCurrent)
   }
 
@@ -371,7 +399,7 @@ export class StaffDetailComponent {
       });
     });
   }
-  
+
 
   ngOnDestroy(): void {
     this.destroy$.next();
@@ -392,12 +420,12 @@ export class StaffDetailComponent {
     this.chart.destroy()
     this.isSetData = true
     this.data = []
-    
+
 
     this.empresa = event.value;
     this.empresaObj = this.empresas.find(empresa => empresa.id === this.empresa);
 
-    
+
 
     this.homeBrokerS.getFlow(event.value).subscribe({
       next: async (res) => {
@@ -408,23 +436,37 @@ export class StaffDetailComponent {
         this.addInitialData();
         this.initChartData();
         this.merkatFlow();
-        
+
       }
     });
   }
 
   private getClosedDay(data: any[]): any {
-    const today = new Date().getDate();
-    return data.find(item => parseInt(item.dia, 10) === today);
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const startDate = new Date(currentYear, 7, 1); // 1 de agosto
+    const daysPassed = Math.floor((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)); // Dias desde 1º de agosto
+
+    const sortedData = data.sort((a, b) => parseInt(a.dia, 10) - parseInt(b.dia, 10));
+
+    return sortedData.find(item => parseInt(item.dia, 10) - 1 === daysPassed);
   }
 
   private getLastDay(data: any[]): any {
-    const today = new Date().getDate();
-    const previousDay = today === 1 ? today : today - 1;
-    return data.find(item => parseInt(item.dia, 10) === previousDay);
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const startDate = new Date(currentYear, 7, 1); // 1 de agosto
+    const daysPassed = Math.floor((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)); // Dias desde 1º de agosto
+    const previousDay = daysPassed; // Penúltimo dia
+
+    // Ordenar os dados por dia
+    const sortedData = data.sort((a, b) => parseInt(a.dia, 10) - parseInt(b.dia, 10));
+
+    // Encontrar o fechamento que corresponde ao penúltimo dia
+    return sortedData.find(item => parseInt(item.dia, 10) === previousDay);
   }
 
-  processSell(){
+  processSell() {
     this.loadingService.present();
     const formattedValue = parseFloat(this.currentValue.toFixed(2));
 
@@ -458,7 +500,7 @@ export class StaffDetailComponent {
         this.sharedService.showToastError("Saldo insuficiente!");
       }
     });
-  
+
   }
 
   processBuy() {
