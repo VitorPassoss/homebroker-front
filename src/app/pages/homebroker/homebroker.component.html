@@ -52,7 +52,7 @@
       <div class="grid">
         <div class="col-12">
           <div class="flex flex-column gap-2 card-info">
-            <p>Valor da Ação: <strong> R$ {{currentValue.toFixed(2)}}</strong> </p>
+            <p>Valor da Ação: <strong> R$ {{currentValue}}</strong> </p>
             <p>Valor da Compra: <strong>R$ {{buyValue.toFixed(2)}}</strong> </p>
             <label htmlFor="quantidade">Quantidade</label>
             <p-inputNumber  [min]="0" [showButtons]="true" incrementButtonIcon="pi pi-plus"
@@ -74,7 +74,7 @@
     <div class="grid">
       <div class="col-12">
         <div class="flex flex-column gap-2 card-info">
-          <p style="margin: 0px !important;">Valor da Ação: <strong> R$ {{currentValue.toFixed(2)}}</strong> </p>
+          <p style="margin: 0px !important;">Valor da Ação: <strong> R$ {{currentValue}}</strong> </p>
           <p style="margin: 0px !important;">Valor da Compra: <strong>R$ {{this.flowCurrent.valor_compra}}</strong> </p>
           <p style="margin: 0px !important;">Ações compradas: <strong>{{ this.flowCurrent.quantidade }}</strong></p>
           <label htmlFor="quantidade">Quantidade á ser vendida</label>

@@ -92,7 +92,8 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
         this.closeds = res;
         this.lastDay = await this.getLastDay(res);
         this.currentClosed = await this.getClosedDay(res);
-
+        console.log('aaa')
+        console.log(this.currentClosed)
         this.setupParams();
         this.addInitialData();
         this.initChartData();
@@ -114,6 +115,7 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
 
     if (currentHour >= 10 && currentHour < 24) {
       this.currentValue = this.currentClosed.valor_final;
+      this.valorFinal  = this.currentClosed.valor_final;
     }
 
     if (isBetween9And5PM) {
@@ -278,10 +280,6 @@ realtime() {
       y: formattedCurrentValue
     });
 
-    // Limite o número de pontos de dados no gráfico
-    if (this.data.length > 10) {
-      this.data.shift();
-    }
 
     this.chart.updateSeries([{
       data: this.data
@@ -398,13 +396,9 @@ realtime() {
     const now = new Date();
     const currentYear = now.getFullYear();
     const startDate = new Date(currentYear, 7, 1); // 1 de agosto
-    const daysPassed = Math.floor((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)); // Dias desde 1º de agosto
-  
-    // Ordenar os dados por dia
-    const sortedData = data.sort((a, b) => parseInt(a.dia, 10) - parseInt(b.dia, 10));
-  
-    // Encontrar o fechamento que corresponde ao número de dias passados
-    return sortedData.find(item => parseInt(item.dia, 10) === daysPassed);
+    const daysPassed = Math.floor((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)); 
+
+    return data.find(item => parseInt(item.dia, 10)  === daysPassed + 1);
   }
   
   private getLastDay(data: any[]): any {

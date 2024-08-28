@@ -325,11 +325,6 @@ export class StaffDetailComponent {
         y: formattedCurrentValue
       });
 
-      // Limite o número de pontos de dados no gráfico
-      if (this.data.length > 10) {
-        this.data.shift();
-      }
-
       this.chart.updateSeries([{
         data: this.data
       }]);
