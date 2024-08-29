@@ -9,6 +9,8 @@ import { ActivatedRoute, Router } from "@angular/router";
 import * as ApexCharts from 'apexcharts'
 
 
+
+
 @Component({
   selector: 'app-homebroker',
   templateUrl: './homebroker.component.html',
@@ -89,11 +91,10 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
 
     this.homeBrokerS.getFlow(empresaId).subscribe({
       next: async (res) => {
-        this.closeds = res;
-        this.lastDay = await this.getLastDay(res);
-        this.currentClosed = await this.getClosedDay(res);
-        console.log('aaa')
-        console.log(this.currentClosed)
+        var resForm = this.calcularValoresFechamento(res);
+        this.closeds = resForm;
+        this.lastDay = await this.getLastDay(resForm);
+        this.currentClosed = await this.getClosedDay(resForm);
         this.setupParams();
         this.addInitialData();
         this.initChartData();
@@ -107,7 +108,6 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
     const currentHour = now.getHours() + 1;
     const isBetween9And5PM = currentHour >= 10 && currentHour < 18;
 
-    console.log(isBetween9And5PM)
 
 
 
@@ -191,8 +191,34 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
     this.chart = new ApexCharts(document.querySelector("#chart"), options);
     this.chart.render();
   }
-  
 
+ 
+  
+  
+  calcularValoresFechamento(fechamentos:any[]) {
+    // Ordenar fechamentos por dia para garantir que o cálculo ocorra na sequência correta
+    fechamentos.sort((a, b) => parseInt(a.dia) - parseInt(b.dia));
+
+    // Inicializar valor acumulado com o valor_final do primeiro fechamento
+    let valorAcumulado = parseFloat(fechamentos[0].valor_final.toString().replace(',', '.'));
+
+    for (let i = 0; i < fechamentos.length; i++) {
+        const fechamento = fechamentos[i];
+        
+        // Converter a string porcentagem para número
+        const porcentagem = parseFloat(fechamento.porcentagem.replace(',', '.'));
+
+        // Calcular o novo valor acumulado com base na porcentagem
+        valorAcumulado += valorAcumulado * (porcentagem / 100);
+
+        // Atualizar o valor_final com o valor acumulado calculado
+        fechamento.valor_final = parseFloat(valorAcumulado.toFixed(2));
+    }
+
+    return fechamentos;
+}
+
+  
 
   private addInitialData(): void {
     const now = new Date();
