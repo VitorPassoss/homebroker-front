@@ -107,6 +107,7 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
     const currentHour = now.getHours() + 1;
     const isBetween9And5PM = currentHour >= 10 && currentHour < 18;
 
+    console.log(isBetween9And5PM)
 
     if (currentHour >= 0 && currentHour < 10) {
       this.valorFinal = this.lastDay.valor_final;
@@ -117,6 +118,7 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
       this.currentValue = this.currentClosed.valor_final;
       this.valorFinal  = this.currentClosed.valor_final;
     }
+    
 
     if (isBetween9And5PM) {
       this.pregaoBool = true;
@@ -130,6 +132,8 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
       this.addInitialData();
       this.initChartData();
     }
+
+    console.log(this.pregaoBool)
   }
 
 
