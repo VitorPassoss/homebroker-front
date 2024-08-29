@@ -109,16 +109,7 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
 
     console.log(isBetween9And5PM)
 
-    if (currentHour >= 0 && currentHour < 10) {
-      this.valorFinal = this.lastDay.valor_final;
-    }
 
-
-    if (currentHour >= 10 && currentHour < 24) {
-      this.currentValue = this.currentClosed.valor_final;
-      this.valorFinal  = this.currentClosed.valor_final;
-    }
-    
 
     if (isBetween9And5PM) {
       this.pregaoBool = true;
@@ -166,7 +157,8 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
           show: true
         },
         zoom: {
-          enabled: true
+          enabled: true,
+          autoScaleYaxis: true // Ajusta automaticamente o eixo Y ao fazer zoom
         }
       },
       dataLabels: {
@@ -181,9 +173,7 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
       },
       xaxis: {
         type: 'datetime',
-        // labels: {
-        //   format: 'HH:mm:ss'
-        // }
+    
       },
       yaxis: {
         labels: {
@@ -201,6 +191,7 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
     this.chart = new ApexCharts(document.querySelector("#chart"), options);
     this.chart.render();
   }
+  
 
 
   private addInitialData(): void {
@@ -234,7 +225,7 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
         month -= 12;
       }
 
-      const timestamp = new Date(currentYear, month, day, 14).getTime();
+      const timestamp = new Date(currentYear, month, day, 8).getTime();
 
       this.data.push({
         x: timestamp,
@@ -262,11 +253,27 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
 
 
 setupParams(): void {
+  const now = new Date();
+  const currentHour = now.getHours() + 1;
+  const isBetween9And5PM = currentHour >= 10 && currentHour < 18;
+
   if (this.currentClosed && this.lastDay) {
     this.initialValue = parseFloat(this.lastDay.valor_final);
-    this.valorFinal = parseFloat(this.lastDay.valor_final);
-    this.currentValue = parseFloat(this.lastDay.valor_final);
+    this.currentValue = parseFloat(this.currentClosed.valor_final);
     this.variation = parseFloat(this.currentClosed.variação);
+
+    if (currentHour >= 0 && currentHour < 10) {
+      this.valorFinal = parseFloat(this.lastDay.valor_final);
+      this.currentValue = parseFloat(this.lastDay.valor_final.toFixed(2));
+
+    }
+    
+
+    if (currentHour >= 18 && currentHour < 24) {
+      this.currentValue = this.currentClosed.valor_final.toFixed(2);
+      this.valorFinal  = this.currentClosed.valor_final.toFixed(2);
+    }
+
   }
 }
 
@@ -284,12 +291,17 @@ realtime() {
       y: formattedCurrentValue
     });
 
-
+    // Atualizar a série e ajustar o intervalo de zoom para o modo de atualização em tempo real
     this.chart.updateSeries([{
       data: this.data
     }]);
 
-  }, 15000);
+    // Ajustar zoom para o modo de seconds se realtime estiver ativado
+    if (this.pregaoBool) {
+      this.chart.zoomX(newDate - 30000, newDate); // Zoom nos últimos 30 segundos
+    }
+
+  }, 45000);
 }
 
   buyAct() {
