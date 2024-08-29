@@ -93,10 +93,10 @@ export class StaffDetailComponent {
 
     this.homeBrokerS.getFlow(empresaId).subscribe({
       next: async (res) => {
-        console.log(res)
-        this.closeds = res;
-        this.lastDay = await this.getLastDay(res);
-        this.currentClosed = await this.getClosedDay(res);
+        var resForm = this.calcularValoresFechamento(res);
+        this.closeds = resForm;
+        this.lastDay = await this.getLastDay(resForm);
+        this.currentClosed = await this.getClosedDay(resForm);
         this.setupParams();
         this.addInitialData();
         this.initChartData();
@@ -105,21 +105,11 @@ export class StaffDetailComponent {
     });
   }
 
-
   merkatFlow() {
     const now = new Date();
     const currentHour = now.getHours() + 1;
     const isBetween9And5PM = currentHour >= 10 && currentHour < 18;
 
-
-    if (currentHour >= 0 && currentHour < 10) {
-      this.valorFinal = this.lastDay.valor_final;
-    }
-
-
-    if (currentHour >= 10 && currentHour < 24) {
-      this.currentValue = this.currentClosed.valor_final;
-    }
 
     if (isBetween9And5PM) {
       this.pregaoBool = true;
@@ -133,6 +123,7 @@ export class StaffDetailComponent {
       this.addInitialData();
       this.initChartData();
     }
+
   }
 
 
@@ -192,54 +183,7 @@ export class StaffDetailComponent {
     this.chart = new ApexCharts(document.querySelector("#chart"), options);
     this.chart.render();
   }
-  private initChartData2(): void {
-    const options = {
-      series: [{
-        name: this.empresaObj.nome,
-        data: this.data.slice()
-      }],
-      chart: {
-        name: this.empresaObj.nome,
-        id: 'realtime',
-        height: 350,
-        type: 'area',
-        toolbar: {
-          show: true
-        },
-        zoom: {
-          enabled: true
-        }
-      },
-      dataLabels: {
-        enabled: false
-      },
-      stroke: {
-        curve: 'smooth'
-      },
-      title: {
-        text: this.empresaObj.nome,
-        align: 'left'
-      },
-      xaxis: {
-        type: 'datetime',
 
-      },
-      yaxis: {
-        labels: {
-          formatter: (value: number) => {
-            // Formata o valor como BRL
-            return `R$ ${value.toFixed(2).replace('.', ',')}`;
-          }
-        }
-      },
-      legend: {
-        show: true
-      },
-    };
-
-    this.chart = new ApexCharts(document.querySelector("#chart"), options);
-    this.chart.render();
-  }
 
 
   private addInitialData(): void {
@@ -273,7 +217,7 @@ export class StaffDetailComponent {
         month -= 12;
       }
 
-      const timestamp = new Date(currentYear, month, day, 14).getTime();
+      const timestamp = new Date(currentYear, month, day, 8).getTime();
 
       this.data.push({
         x: timestamp,
@@ -300,14 +244,26 @@ export class StaffDetailComponent {
 
 
   setupParams(): void {
+    const now = new Date();
+    const currentHour = now.getHours() + 1;
+  
     if (this.currentClosed && this.lastDay) {
       this.initialValue = parseFloat(this.lastDay.valor_final);
-      this.valorFinal = parseFloat(this.lastDay.valor_final);
-      this.currentValue = parseFloat(this.lastDay.valor_final);
+      this.currentValue = parseFloat(this.currentClosed.valor_final);
       this.variation = parseFloat(this.currentClosed.variação);
-
-
-
+  
+      if (currentHour >= 0 && currentHour < 10) {
+        this.valorFinal = parseFloat(this.lastDay.valor_final);
+        this.currentValue = parseFloat(this.lastDay.valor_final.toFixed(2));
+  
+      }
+      
+  
+      if (currentHour >= 18 && currentHour < 24) {
+        this.currentValue = this.currentClosed.valor_final.toFixed(2);
+        this.valorFinal  = this.currentClosed.valor_final.toFixed(2);
+      }
+  
     }
   }
 
@@ -378,6 +334,31 @@ export class StaffDetailComponent {
     }
   }
 
+
+  calcularValoresFechamento(fechamentos:any[]) {
+    // Ordenar fechamentos por dia para garantir que o cálculo ocorra na sequência correta
+    fechamentos.sort((a, b) => parseInt(a.dia) - parseInt(b.dia));
+
+    // Inicializar valor acumulado com o valor_final do primeiro fechamento
+    let valorAcumulado = parseFloat(fechamentos[0].valor_final.toString().replace(',', '.'));
+
+    for (let i = 0; i < fechamentos.length; i++) {
+        const fechamento = fechamentos[i];
+        
+        // Converter a string porcentagem para número
+        const porcentagem = parseFloat(fechamento.porcentagem.replace(',', '.'));
+
+        // Calcular o novo valor acumulado com base na porcentagem
+        valorAcumulado += valorAcumulado * (porcentagem / 100);
+
+        // Atualizar o valor_final com o valor acumulado calculado
+        fechamento.valor_final = parseFloat(valorAcumulado.toFixed(2));
+    }
+
+    return fechamentos;
+}
+
+  
 
   async getFlowByBussines() {
     this.flowCurrent = await this.wallets.find((wallet: any) => wallet.empresa.id === this.empresaObj.id);

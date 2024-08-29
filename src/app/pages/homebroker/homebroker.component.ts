@@ -109,8 +109,6 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
     const isBetween9And5PM = currentHour >= 10 && currentHour < 18;
 
 
-
-
     if (isBetween9And5PM) {
       this.pregaoBool = true;
       this.loading = false;
@@ -124,7 +122,6 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
       this.initChartData();
     }
 
-    console.log(this.pregaoBool)
   }
 
 
@@ -422,9 +419,11 @@ realtime() {
 
     this.homeBrokerS.getFlow(event.value).subscribe({
       next: async (res) => {
-        this.closeds = res;
-        this.lastDay = await this.getLastDay(res);
-        this.currentClosed = await this.getClosedDay(res);
+        var resForm = this.calcularValoresFechamento(res);
+
+        this.closeds = resForm;
+        this.lastDay = await this.getLastDay(resForm);
+        this.currentClosed = await this.getClosedDay(resForm);
         this.setupParams();
         this.addInitialData();
         this.initChartData();
