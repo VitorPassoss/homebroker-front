@@ -185,7 +185,6 @@ export class StaffDetailComponent {
   }
 
 
-
   private addInitialData(): void {
     const now = new Date();
     const currentYear = now.getFullYear();
@@ -242,10 +241,12 @@ export class StaffDetailComponent {
     }
   }
 
-
   setupParams(): void {
     const now = new Date();
     const currentHour = now.getHours() + 1;
+    const isBetween9And5PM = currentHour >= 10 && currentHour < 18;
+    this.currentValue =  parseFloat(this.currentClosed.valor_fina);
+    this.valorFinal  =  parseFloat(this.currentClosed.valor_final);
   
     if (this.currentClosed && this.lastDay) {
       this.initialValue = parseFloat(this.lastDay.valor_final);
@@ -254,39 +255,63 @@ export class StaffDetailComponent {
   
       if (currentHour >= 0 && currentHour < 10) {
         this.valorFinal = parseFloat(this.lastDay.valor_final);
-        this.currentValue = parseFloat(this.lastDay.valor_final.toFixed(2));
+        this.currentValue = parseFloat(this.lastDay.valor_final);
   
       }
       
-  
-      if (currentHour >= 18 && currentHour < 24) {
-        this.currentValue = this.currentClosed.valor_final.toFixed(2);
-        this.valorFinal  = this.currentClosed.valor_final.toFixed(2);
-      }
+    
   
     }
   }
 
   realtime() {
+
+
     setInterval(() => {
       const newDate = this.getCurrentTimeInBrasilia().getTime();
+  
+      // Verifique se this.variation está definido e é um número válido
+      if (isNaN(this.variation)) {
+        console.error('O valor de this.variation não é um número válido');
+        return;
+      }
+  
+      // Calcule o fator de variação
       let variationFactor = (Math.random() - 0.5) * (2 * this.variation);
-
+  
+      // Verifique se this.currentValue é um número válido
+      if (isNaN(this.currentValue)) {
+        console.error('O valor de this.currentValue não é um número válido');
+        return;
+      }
+  
+      console.log(`Current Value: ${this.currentValue}`);
+      console.log(`Variation Factor: ${variationFactor}`);
+  
+      // Atualize o valor atual
       this.currentValue += this.currentValue * variationFactor;
-
-      const formattedCurrentValue = parseFloat(this.currentValue.toFixed(2));
-
+  
+      // Formate o valor atual com duas casas decimais
+      this.currentValue = parseFloat(this.currentValue.toFixed(2));
+  
+      // Adicione o novo ponto de dados
       this.data.push({
         x: newDate,
-        y: formattedCurrentValue
+        y: this.currentValue
       });
-
+  
+      // Atualize a série do gráfico
       this.chart.updateSeries([{
         data: this.data
       }]);
-
+  
+      this.chart.zoomX(newDate - 15000, newDate)
+      ;
+  
+   
     }, 15000);
   }
+  
 
   buyAct() {
     this.visible = true;
