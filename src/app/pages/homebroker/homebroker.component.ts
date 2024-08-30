@@ -7,6 +7,7 @@ import { FormBuilder, FormGroup } from "@angular/forms";
 import { ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import * as ApexCharts from 'apexcharts'
+import { format } from 'date-fns-tz';
 
 
 
@@ -167,6 +168,7 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
       },
       xaxis: {
         type: 'datetime',
+        label: 'HH:mm:ss'
     
       },
       yaxis: {
@@ -295,10 +297,41 @@ setupParams(): void {
   }
 }
 
+
 realtime() {
+  let dataAdditionCount = 0;
+  const newDate = this.getCurrentTimeInBrasilia().getTime();
+
+  const rangeStart = newDate - 60000; 
+  this.data.push({
+    x: newDate - 15000,
+    y: this.currentValue - 20
+  });
+
+  
+  this.data.push({
+    x: newDate - 10000,
+    y: this.currentValue - 40
+  });
+    // Adicione os novos dados
+    this.data.push({
+      x: newDate - 5000,
+      y: this.currentValue - 23.40
+    });
+
+  this.chart.updateOptions({
+    xaxis: {
+      min: rangeStart,
+      max: newDate
+    }
+  });
+
+  this.chart.updateSeries([{
+    data: this.data
+  }]);
 
 
-  setInterval(() => {
+ setInterval(() => {
     const newDate = this.getCurrentTimeInBrasilia().getTime();
 
     // Verifique se this.variation está definido e é um número válido
@@ -316,32 +349,50 @@ realtime() {
       return;
     }
 
-    console.log(`Current Value: ${this.currentValue}`);
-    console.log(`Variation Factor: ${variationFactor}`);
-
     // Atualize o valor atual
     this.currentValue += this.currentValue * variationFactor;
-
-    // Formate o valor atual com duas casas decimais
     this.currentValue = parseFloat(this.currentValue.toFixed(2));
 
-    // Adicione o novo ponto de dados
+    // Adicione os novos dados
     this.data.push({
       x: newDate,
       y: this.currentValue
     });
 
+    // Limite o número de pontos no gráfico (opcional)
+    if (this.data.length > 1000) { // Por exemplo, manter apenas os últimos 1000 pontos
+      this.data.shift(); // Remove o ponto mais antigo
+    }
+
     // Atualize a série do gráfico
-    this.chart.updateSeries([{
-      data: this.data
-    }]);
-
-    this.chart.zoomX(newDate - 15000, newDate)
-    ;
-
  
-  }, 15000);
+   
+
+    dataAdditionCount++;
+
+    
+    if (dataAdditionCount >= 3) {
+      const rangeStart = newDate - 60000; 
+
+      this.chart.updateSeries([{
+        data: this.data
+      }]);
+  
+      this.chart.updateOptions({
+        xaxis: {
+          min: rangeStart,
+          max: newDate
+        }
+      });
+
+      dataAdditionCount = 0;
+    }
+  }, 1000); // Atualizar a cada 15 segundos
 }
+
+
+
+
 
 
   buyAct() {
