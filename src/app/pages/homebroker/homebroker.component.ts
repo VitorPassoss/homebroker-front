@@ -153,10 +153,7 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
         toolbar: {
           show: true
         },
-        zoom: {
-          enabled: true,
-          autoScaleYaxis: true // Ajusta automaticamente o eixo Y ao fazer zoom
-        }
+    
       },
       dataLabels: {
         enabled: false
@@ -299,13 +296,7 @@ setupParams(): void {
 }
 
 realtime() {
-  var newDate2 = this.getCurrentTimeInBrasilia().getTime();
 
-
-  setTimeout(()=>{
-    this.chart.zoomX(newDate2 - 15000, newDate2);
-
-  },15000)
 
   setInterval(() => {
     const newDate = this.getCurrentTimeInBrasilia().getTime();
@@ -344,6 +335,9 @@ realtime() {
     this.chart.updateSeries([{
       data: this.data
     }]);
+
+    this.chart.zoomX(newDate - 15000, newDate)
+    ;
 
  
   }, 15000);
