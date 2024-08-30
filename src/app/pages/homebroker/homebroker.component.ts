@@ -106,7 +106,7 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
   merkatFlow() {
     const now = new Date();
     const currentHour = now.getHours() + 1;
-    const isBetween9And5PM = currentHour >= 10 && currentHour < 22;
+    const isBetween9And5PM = currentHour >= 10 && currentHour < 23;
 
 
     if (isBetween9And5PM) {
