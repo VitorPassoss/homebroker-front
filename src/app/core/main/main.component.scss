@@ -17,6 +17,31 @@
     display: none;
 }
 
+.img-cont {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+
+    h1 {
+        color: #FFB267;
+        font-size: 20px;
+        text-align: center;
+        font-weight: 700;
+        font-family:Arial, Helvetica, sans-serif;
+        padding-bottom: 6px;
+        border-bottom: 1px solid gray;
+    }
+
+    img {
+        position: absolute;
+        bottom: 30px;
+        width: 90px;
+        height: 90px;
+    }
+}
+
+
 .header {
     position: fixed;
     top: 0px;

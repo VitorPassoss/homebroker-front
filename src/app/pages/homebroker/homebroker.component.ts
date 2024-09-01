@@ -107,24 +107,26 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
   merkatFlow() {
     const now = new Date();
     const currentHour = now.getHours() + 1;
-    const isBetween9And5PM = currentHour >= 10 && currentHour < 24;
-
-
-    if (isBetween9And5PM) {
+    const dayOfWeek = now.getDay(); 
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6; 
+    const isBetween9And5PM = currentHour >= 10 && currentHour < 21;
+  
+    if ( isBetween9And5PM) {
       this.pregaoBool = true;
       this.loading = false;
-      this.realtime();
+      this.realtime();  
     } else {
-      this.chart.destroy();
+      if (this.chart) {
+        this.chart.destroy();
+      }
       this.data = [];
       this.pregaoBool = false;
       this.loading = false;
       this.addInitialData();
       this.initChartData();
     }
-
   }
-
+  
 
 
   private getCurrentTimeInBrasilia(): Date {
@@ -216,63 +218,71 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
 
   
 
-  private addInitialData(): void {
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const startDate = new Date(currentYear, 7, 1); // Data de início: 01/08/2024
-    const baseMonth = 7; // Mês de agosto (0-indexado, agosto é 7)
+private addInitialData(): void {
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const startDate = new Date(currentYear, 7, 1); // Data de início: 01/08/2024
+  const daysPassed = Math.floor((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
 
-    // Calcular quantos dias passaram desde o início de agosto até hoje
-    const daysPassed = Math.floor((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+  console.log(daysPassed);
+  console.log(this.closeds.length);
 
-    console.log(daysPassed);
-    console.log(this.closeds.length);
+  // Ordenar fechamentos por dia
+  this.closeds.sort((a: any, b: any) => parseInt(a.dia) - parseInt(b.dia));
 
-    // Ordenar fechamentos por dia
-    this.closeds.sort((a: any, b: any) => parseInt(a.dia) - parseInt(b.dia));
+  console.log(this.closeds);
 
-    // Adicionar fechamentos ao gráfico considerando meses e dias
-    this.closeds.forEach((closed: any, index: number) => {
+  // Variáveis para controle de mês e dia
+  let currentMonth = 7; // Agosto
+  let currentDay = 1;
+
+  this.closeds.forEach((closed: any) => {
       let day = parseInt(closed.dia);
-      let month = baseMonth;
 
-      // Calcular mês e dia considerando dias que excedem 31
-      while (day > 31) {
-        day -= 31;
-        month += 1; // Passa para o próximo mês
+      // Adiciona ao gráfico somente os registros dentro do período
+      if (day <= daysPassed) {
+          // Calcula o dia e o mês corretos considerando os dias que excedem o mês atual
+          while (day > this.daysInMonth(currentYear, currentMonth)) {
+              day -= this.daysInMonth(currentYear, currentMonth);
+              currentMonth += 1;
+          }
+
+          // Se o mês calculado for maior que 11 (dezembro), reseta para 0 (janeiro do próximo ano)
+          if (currentMonth > 11) {
+              currentMonth -= 12;
+          }
+
+          const timestamp = new Date(currentYear, currentMonth, day, 10).getTime();
+
+          this.data.push({
+              x: timestamp,
+              y: parseFloat(closed.valor_final)
+          });
+
+          currentDay = day;
       }
+  });
 
-      // Se o mês calculado for maior que 11 (dezembro), reseta para 0 (janeiro do próximo ano)
-      if (month > 11) {
-        month -= 12;
-      }
+  const nowH = new Date();
+  const currentHour = nowH.getHours() + 1;
 
-      const timestamp = new Date(currentYear, month, day, 8).getTime();
-
-      this.data.push({
-        x: timestamp,
-        y: parseFloat(closed.valor_final)
-      });
-    });
-
-    const nowH = new Date();
-    const currentHour = nowH.getHours() + 1;
-
-    // Se o horário estiver entre meia-noite e 10 horas da manhã
-    if (currentHour >= 0 && currentHour < 10) {
+  // Se o horário estiver entre meia-noite e 10 horas da manhã
+  if (currentHour >= 0 && currentHour < 10) {
       this.data.pop(); // Remove o último registro
 
       if (this.data.length > 0) {
-        const previousEntry = this.data[this.data.length - 1];
-        this.data.push({
-          x: previousEntry.x, // Reutilizar o timestamp do dia anterior
-          y: previousEntry.y  // Reutilizar o valor do dia anterior
-        });
+          const previousEntry = this.data[this.data.length - 1];
+          this.data.push({
+              x: previousEntry.x, // Reutilizar o timestamp do dia anterior
+              y: previousEntry.y  // Reutilizar o valor do dia anterior
+          });
       }
-    }
   }
+}
 
-
+  private daysInMonth(year: number, month: number): number {
+    return new Date(year, month + 1, 0).getDate();
+}
 
 setupParams(): void {
   const now = new Date();
@@ -305,18 +315,18 @@ realtime() {
   const rangeStart = newDate - 60000; 
   this.data.push({
     x: newDate - 15000,
-    y: this.currentValue - 20
+    y: this.currentValue - 5
   });
 
   
   this.data.push({
     x: newDate - 10000,
-    y: this.currentValue - 40
+    y: this.currentValue - 3
   });
     // Adicione os novos dados
     this.data.push({
       x: newDate - 5000,
-      y: this.currentValue - 23.40
+      y: this.currentValue - 2
     });
 
   this.chart.updateOptions({
@@ -350,7 +360,7 @@ realtime() {
     }
 
     // Atualize o valor atual
-    this.currentValue += this.currentValue * variationFactor;
+    this.currentValue += this.currentValue * variationFactor / 100;
     this.currentValue = parseFloat(this.currentValue.toFixed(2));
 
     // Adicione os novos dados
@@ -475,6 +485,7 @@ realtime() {
   }
 
   setEmpresa(event: any): void {
+    console.log
     this.chart.destroy()
     this.isSetData = true
     this.data = []
@@ -487,6 +498,7 @@ realtime() {
 
     this.homeBrokerS.getFlow(event.value).subscribe({
       next: async (res) => {
+        console.log(res)
         var resForm = this.calcularValoresFechamento(res);
 
         this.closeds = resForm;
