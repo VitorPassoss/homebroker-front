@@ -109,7 +109,7 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
     const currentHour = now.getHours() + 1;
     const dayOfWeek = now.getDay(); 
     const isWeekend = dayOfWeek === 0 || dayOfWeek === 6; 
-    const isBetween9And5PM = currentHour >= 10 && currentHour < 18;
+    const isBetween9And5PM = currentHour >= 10 && currentHour < 21;
   
     if ( isBetween9And5PM && !isWeekend) {
       this.pregaoBool = true;

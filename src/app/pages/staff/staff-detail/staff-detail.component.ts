@@ -59,7 +59,9 @@ export class StaffDetailComponent {
       quantidade: [null],
       empresa: [null],
       valor_compra: [null],
-      valor_acao: [0]
+      valor_acao: [0],
+      quantidade_vendida: [null],
+
     })
   }
 
@@ -250,7 +252,6 @@ export class StaffDetailComponent {
         }
     }
   }
-
   private daysInMonth(year: number, month: number): number {
     return new Date(year, month + 1, 0).getDate();
 }
@@ -524,7 +525,7 @@ export class StaffDetailComponent {
     return sortedData.find(item => parseInt(item.dia, 10) === previousDay);
   }
 
-  processSell() {
+  processSell(){
     this.loadingService.present();
     const formattedValue = parseFloat(this.currentValue.toFixed(2));
 
@@ -558,7 +559,7 @@ export class StaffDetailComponent {
         this.sharedService.showToastError("Saldo insuficiente!");
       }
     });
-
+  
   }
 
   processBuy() {
