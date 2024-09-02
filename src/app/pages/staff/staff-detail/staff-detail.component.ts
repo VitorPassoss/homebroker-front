@@ -369,7 +369,6 @@ export class StaffDetailComponent {
       }
     }, 1000); // Atualizar a cada 15 segundos
   }
-  
 
   buyAct() {
     this.visible = true;
