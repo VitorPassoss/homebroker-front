@@ -224,13 +224,10 @@ private addInitialData(): void {
   const startDate = new Date(currentYear, 7, 1); // Data de início: 01/08/2024
   const daysPassed = Math.floor((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
 
-  console.log(daysPassed);
-  console.log(this.closeds.length);
 
   // Ordenar fechamentos por dia
   this.closeds.sort((a: any, b: any) => parseInt(a.dia) - parseInt(b.dia));
 
-  console.log(this.closeds);
 
   // Variáveis para controle de mês e dia
   let currentMonth = 7; // Agosto
@@ -238,9 +235,10 @@ private addInitialData(): void {
 
   this.closeds.forEach((closed: any) => {
       let day = parseInt(closed.dia);
-
+      
+    
       // Adiciona ao gráfico somente os registros dentro do período
-      if (day <= daysPassed) {
+      if (day < daysPassed) {
           // Calcula o dia e o mês corretos considerando os dias que excedem o mês atual
           while (day > this.daysInMonth(currentYear, currentMonth)) {
               day -= this.daysInMonth(currentYear, currentMonth);
@@ -253,6 +251,8 @@ private addInitialData(): void {
           }
 
           const timestamp = new Date(currentYear, currentMonth, day, 10).getTime();
+
+          console.log(timestamp)
 
           this.data.push({
               x: timestamp,
@@ -423,7 +423,6 @@ realtime() {
       // Obtém as carteiras usando o ID da pessoa
       const wallets = await this.staffService.getWalletByID(personData.id).toPromise();
       this.wallets = wallets;
-      console.log(this.wallets)
 
       // Para cada carteira, obtém o fluxo correspondente e adiciona ao objeto wallet
       for (let wallet of this.wallets) {
@@ -454,7 +453,6 @@ realtime() {
 
  async getFlowByBussines(){
      this.flowCurrent = await this.wallets.find((wallet:any) => wallet.empresa.id === this.empresaObj.id);
-    console.log(this.flowCurrent)
   }
 
   getFlow(id: any): Promise<any> {
@@ -498,7 +496,6 @@ realtime() {
 
     this.homeBrokerS.getFlow(event.value).subscribe({
       next: async (res) => {
-        console.log(res)
         var resForm = this.calcularValoresFechamento(res);
 
         this.closeds = resForm;
@@ -553,8 +550,6 @@ realtime() {
     });
 
     const formData = this.buyForm.value;
-
-    console.log(formData)
 
     this.homeBrokerS.processSell(formData).subscribe({
       next: async (res) => {

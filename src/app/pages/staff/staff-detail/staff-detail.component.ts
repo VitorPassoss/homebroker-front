@@ -213,8 +213,7 @@ export class StaffDetailComponent {
         let day = parseInt(closed.dia);
   
         // Adiciona ao gráfico somente os registros dentro do período
-        if (day <= daysPassed) {
-            // Calcula o dia e o mês corretos considerando os dias que excedem o mês atual
+        if (day < daysPassed) {
             while (day > this.daysInMonth(currentYear, currentMonth)) {
                 day -= this.daysInMonth(currentYear, currentMonth);
                 currentMonth += 1;
