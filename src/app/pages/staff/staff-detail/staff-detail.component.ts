@@ -285,18 +285,18 @@ export class StaffDetailComponent {
     const rangeStart = newDate - 60000; 
     this.data.push({
       x: newDate - 15000,
-      y: this.currentValue - 5
+      y: this.currentValue - 0.54
     });
   
     
     this.data.push({
       x: newDate - 10000,
-      y: this.currentValue - 3
+      y: this.currentValue - 0.33
     });
       // Adicione os novos dados
       this.data.push({
         x: newDate - 5000,
-        y: this.currentValue - 2
+        y: this.currentValue - 0.24
       });
   
     this.chart.updateOptions({
