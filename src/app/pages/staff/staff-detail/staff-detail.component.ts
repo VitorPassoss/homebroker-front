@@ -224,7 +224,7 @@ export class StaffDetailComponent {
                 currentMonth -= 12;
             }
   
-            const timestamp = new Date(currentYear, currentMonth, day, 10).getTime();
+            const timestamp = new Date(currentYear, currentMonth, day, 5).getTime();
   
             this.data.push({
                 x: timestamp,

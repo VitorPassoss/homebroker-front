@@ -250,7 +250,7 @@ private addInitialData(): void {
               currentMonth -= 12;
           }
 
-          const timestamp = new Date(currentYear, currentMonth, day, 10).getTime();
+          const timestamp = new Date(currentYear, currentMonth, day, 5).getTime();
 
           console.log(timestamp)
 
@@ -345,40 +345,30 @@ realtime() {
  setInterval(() => {
     const newDate = this.getCurrentTimeInBrasilia().getTime();
 
-    // Verifique se this.variation está definido e é um número válido
     if (isNaN(this.variation)) {
       console.error('O valor de this.variation não é um número válido');
       return;
     }
 
-    // Calcule o fator de variação
     let variationFactor = (Math.random() - 0.5) * (2 * this.variation);
 
-    // Verifique se this.currentValue é um número válido
     if (isNaN(this.currentValue)) {
       console.error('O valor de this.currentValue não é um número válido');
       return;
     }
 
-    // Atualize o valor atual
     this.currentValue += this.currentValue * variationFactor / 100;
     this.currentValue = parseFloat(this.currentValue.toFixed(2));
 
-    // Adicione os novos dados
     this.data.push({
       x: newDate,
       y: this.currentValue
     });
 
-    // Limite o número de pontos no gráfico (opcional)
-    if (this.data.length > 1000) { // Por exemplo, manter apenas os últimos 1000 pontos
-      this.data.shift(); // Remove o ponto mais antigo
+    if (this.data.length > 1000) { 
+      this.data.shift(); 
     }
-
-    // Atualize a série do gráfico
- 
    
-
     dataAdditionCount++;
 
     
@@ -398,13 +388,8 @@ realtime() {
 
       dataAdditionCount = 0;
     }
-  }, 1000); // Atualizar a cada 15 segundos
+  }, 1000);
 }
-
-
-
-
-
 
   buyAct() {
     this.visible = true;
