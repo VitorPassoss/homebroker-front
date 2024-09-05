@@ -221,38 +221,43 @@ export class HomebrokerComponent implements OnInit, OnDestroy {
 private addInitialData(): void {
   const now = new Date();
   const currentYear = now.getFullYear();
-  const startDate = new Date(currentYear, 7, 1); // Data de início: 01/08/2024
+  const startDate = new Date(currentYear, 7, 1); // Data de início: 01/08/2024 (Agosto)
   const daysPassed = Math.floor((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-
 
   // Ordenar fechamentos por dia
   this.closeds.sort((a: any, b: any) => parseInt(a.dia) - parseInt(b.dia));
 
-
-  // Variáveis para controle de mês e dia
-  let currentMonth = 7; // Agosto
+  // Variáveis para controle de mês, dia e contagem de registros processados
+  let currentMonth = 7; // Começa em agosto (mês 7)
   let currentDay = 1;
+  let processedRecords = 0; // Contador de registros processados
+
+  const maxRecordsPerMonth = (month: number) => {
+    // Se o mês tiver 31 dias, retorna 31, senão retorna 30
+    return this.daysInMonth(currentYear, month) === 31 ? 31 : 30;
+  };
+
+  // Inicializa o mês e dia corrente para o processamento dos registros
+  let dayOffset = 0;
+  let daysInCurrentMonth = this.daysInMonth(currentYear, currentMonth);
 
   this.closeds.forEach((closed: any) => {
       let day = parseInt(closed.dia);
-      
-    
+
       // Adiciona ao gráfico somente os registros dentro do período
-      if (day < daysPassed) {
-          // Calcula o dia e o mês corretos considerando os dias que excedem o mês atual
-          while (day > this.daysInMonth(currentYear, currentMonth)) {
-              day -= this.daysInMonth(currentYear, currentMonth);
-              currentMonth += 1;
+      if (dayOffset < daysPassed) {
+          processedRecords++;
+          
+          if (processedRecords > maxRecordsPerMonth(currentMonth)) {
+              if (currentMonth > 11) {
+                  currentMonth = 0; // Volta para janeiro
+              }
+              daysInCurrentMonth = this.daysInMonth(currentYear, currentMonth);
+              processedRecords = 1; 
           }
 
-          // Se o mês calculado for maior que 11 (dezembro), reseta para 0 (janeiro do próximo ano)
-          if (currentMonth > 11) {
-              currentMonth -= 12;
-          }
-
+          // Calcula o timestamp com base no mês e dia atual
           const timestamp = new Date(currentYear, currentMonth, day, 5).getTime();
-
-          console.log(timestamp)
 
           this.data.push({
               x: timestamp,
@@ -260,25 +265,14 @@ private addInitialData(): void {
           });
 
           currentDay = day;
+          dayOffset++;
       }
   });
 
-  const nowH = new Date();
-  const currentHour = nowH.getHours() + 1;
-
-  // Se o horário estiver entre meia-noite e 10 horas da manhã
-  if (currentHour >= 0 && currentHour < 10) {
-      this.data.pop(); // Remove o último registro
-
-      if (this.data.length > 0) {
-          const previousEntry = this.data[this.data.length - 1];
-          this.data.push({
-              x: previousEntry.x, // Reutilizar o timestamp do dia anterior
-              y: previousEntry.y  // Reutilizar o valor do dia anterior
-          });
-      }
-  }
+  console.log(this.data);
 }
+
+
 
   private daysInMonth(year: number, month: number): number {
     return new Date(year, month + 1, 0).getDate();
